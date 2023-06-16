@@ -1,0 +1,15 @@
+<%- include('./header.ejs') -%>
+
+<div>
+    <p> Account: <%= account %></p>
+    <p> Balance: <%= balance %> eth</p>
+
+    <button onclick="back_to_home()">back</button>
+</div>
+
+
+<script>
+    function back_to_home(){
+        location.assign("http://localhost:3000")
+    }
+</script>

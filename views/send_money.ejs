@@ -1,0 +1,54 @@
+<%- include('./header.ejs') -%>
+
+<div>
+    <form  method="post"  action="/send_money" onsubmit="check_send()">
+        <label for="sender_address">Insert your address:</label>
+        <input id="sender_address" type = "text" name="sender" required>
+        <br>
+        <label for="receiver_address">Insert the receiver address:</label>
+        <input id="receiver_address" type = "text" name="receiver" required>
+        <br>
+        <label for="quantity">Insert the quantity (in eth):</label>
+        <input id="quantity" type = "text" name="quantity" required>
+        <br>
+        <button type = "submit">send</button>
+    </form>
+
+</div>
+
+<script>
+
+    function check_send(){
+        
+        var text_num = document.getElementById("quantity_input").value;        
+        var num = Number(text_num);
+        if(isNaN(num)){
+            alert("insert a correct number")
+            return false;
+        } 
+        var is_addr = isAddress(document.getElementById("address_input").value)
+        if(!is_addr){
+            return false;
+        }
+        
+        var quantity = document.getElementById("quantity").value;
+        var sender_address = document.getElementById("sender_address").value;
+        var receiver_address = document.getElementById("receiver_address").value;
+        fetch ("http://localhost:3000/send_money",{
+            method: "POST",
+            mode: "cors",
+            cache: "no-cache",
+            credentials: "same-origin",
+            headers: {
+            "Content-Type": "application/json",
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            qty: JSON.stringify(quantity),
+            sender: JSON.stringify(sender_address),
+            receiver: JSON.stringify(receiver_address),
+        }).then(response=>{
+            alert(response)
+        })
+    }
+
+</script>

@@ -1,0 +1,34 @@
+<%- include('./header.ejs') -%>
+
+<div>
+    <form  method="post"  action="/remove" onsubmit="return check_remove()">
+        <label for="address_input">Insert your address:</label>
+        <input id="address_input" type = "text" name="address">
+        <br>
+        <label for="quantity_input">Insert the quantity (in eth):</label>
+        <input id="quantity_input" type = "text" name="quantity">
+        <br>
+        <button type = "submit" method=post>add</button>
+    </form>
+
+</div>
+
+<script>
+
+    function check_remove(){
+        
+        var text_num = document.getElementById("quantity_input").value;        
+        var num = Number(text_num);
+        if(isNaN(num)){
+            alert("insert a correct number")
+            return false;
+        } 
+        var is_addr = isAddress(document.getElementById("address_input").value)
+        if(!is_addr){
+            return false;
+        }
+        
+        return true;
+    }
+
+</script>

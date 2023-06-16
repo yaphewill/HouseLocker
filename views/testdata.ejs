@@ -1,0 +1,47 @@
+<%- include('./header.ejs') -%>
+
+<div>
+    <form  method="post"  action="/send_data" onsubmit="check_send()">
+        <label for="data1">Insert your data1:</label>
+        <input id="data1" type = "text" name="data1" required>
+        <br>
+        <label for="data2">Insert your data2:</label>
+        <input id="data2" type = "text" name="data2" required>
+        <br>
+        <!-- <br>
+        <label for="receiver_address">Insert the receiver address:</label>
+        <input id="receiver_address" type = "text" name="receiver" required>
+        <br>
+        <label for="quantity">Insert the quantity (in eth):</label>
+        <input id="quantity" type = "text" name="quantity" required>
+        <br>-->
+        <button type = "submit">send</button> 
+    </form>
+
+</div>
+
+<script>
+
+    function check_send(){
+
+        
+        var data1 = document.getElementById("data1").value;
+        var data2 = document.getElementById("data2").value;
+
+        fetch ("http://localhost:3000/send_data",{
+            method: "POST",
+            mode: "cors",
+            cache: "no-cache",
+            credentials: "same-origin",
+            headers: {
+            "Content-Type": "application/json",
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            data1: JSON.stringify(data1),
+            data2: JSON.stringify(data2),
+        }).then(response=>{
+            alert(response)
+        })
+    }
+
+</script>
