@@ -4,7 +4,13 @@ const hashSchema = new mongoose.Schema({
     hash: String,
 })
 
+const userchema = new mongoose.Schema({
+    address:String,
+    role:String,
+})
+
 const Hash = mongoose.model('Hash', hashSchema);
+const User = mongoose.model('User', userchema);
 
 mongoose.connect('mongodb+srv://davidepasetto1:ba14thg5OpUczEPP@houseblocker.llcycrt.mongodb.net/?retryWrites=true&w=majority',
     {
@@ -21,4 +27,4 @@ mongoose.connect('mongodb+srv://davidepasetto1:ba14thg5OpUczEPP@houseblocker.llc
         console.log("error:",err)
     })
 
-module.exports = {Hash}
+module.exports = {Hash,User}

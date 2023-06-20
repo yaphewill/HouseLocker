@@ -1,0 +1,38 @@
+<%- include('./header.ejs') -%>
+
+
+<div>
+    <form action = "/user/create" method="POST" onsubmit="return check_send()">
+        <label for="user_address">Insert your address:</label>
+        <input id="user_address" type = "text" name="user_address" required>
+        <br>
+        <label for="role">Select the role</label>
+        <select id="role" name="role" required>
+            <option value = "student">Student</option>
+            <option value = "renter">Renter</option>
+        </select>
+        <br>
+        <button type = "submit">create</button>
+    </form>
+
+</div>
+
+<script>
+
+    function check_send(){
+        
+        var addr = document.getElementById("user_address").value
+
+        if(!isAddress(addr)){
+            // alert("Nonono")
+            return false;
+        }
+        else return true
+        // alert(addr2)
+        
+        // var role = Document.getElementById("role").value
+
+
+    }
+
+</script>

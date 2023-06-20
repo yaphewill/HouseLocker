@@ -5,10 +5,13 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var addRouter = require("./routes/add")
+// var addRouter = require("./routes/add")
 var sendRouter = require("./routes/send_money")
-var removeRouter = require("./routes/remove")
-var usersRouter = require('./routes/users');
+// var removeRouter = require("./routes/remove")
+var userRouter = require('./routes/user');
+var contractInitRouter = require('./routes/start_contract');
+var roomsRouter = require('./routes/rooms');
+
 
 var app = express();
 
@@ -27,10 +30,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/', indexRouter);
-app.use('/add', addRouter);
+// app.use('/add', addRouter);
 app.use('/send_money', sendRouter);
-app.use('/remove', removeRouter);
-app.use('/users', usersRouter);
+// app.use('/remove', removeRouter);
+app.use('/user', userRouter);
+app.use('/init', contractInitRouter);
+app.use('/rooms', roomsRouter);
+
 
 
 // catch 404 and forward to error handler
@@ -50,3 +56,5 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+//TODO separate views of student and renter

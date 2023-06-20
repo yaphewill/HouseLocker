@@ -1,84 +1,56 @@
 <%- include('./header.ejs') -%>
 <div>
 
-  <h1><%= title %></h1>
-  <p>Welcome to <%= title %></p>
-  <br>
-  <!-- <form method = "get" action = "/check_full">
-    <button type = "submit">check full</button>
-  </form> -->
-  <button id="check_full" onclick = "check_full()">check full</button>
-  <br><br>
-  <button id="get_quantity" onclick = "get_quantity()">get_quantity</button>
-  <br><br>
-  <button id="get_owner" onclick = "get_owner()">get_owner</button>
-  <br><br>
+    <br>
 
-  <form method = "get" action = "/add">
-    <button type = "submit">add value</button>
-  </form>
-  <br>
-  <form method = "get" action = "/remove">
-    <button type = "submit">remove value</button>
-  </form>
-  <br>
-  <form method = "get" action = "/send_money">
-    <button type = "submit">send money</button>
-  </form>
-  <br>
-  <form method = "get" action = "/test_msg.data">
-    <button type = "submit">test msg.data</button>
-  </form>
-  <br>
-  <form method = "get" action = "/add_hash_to_db">
-    <label for="hash_input">insert hash:</label>
-    <input id = "hash_input" type="text" name="hash" >
-    <button type = "submit">add hash to db</button>
-  </form>
-  <br>
-  <form method="get" action="/balance" onsubmit="return isAddress(document.getElementById('account_input').value)">
-    <label for="account_input"> Insert address:</label>
-    <input id = "account_input" type="text" name="account" >
-    <button id="search_balance" type="submit">search</button>
-  </form>
 
+
+    <form method = "GET" action = "/user/login">
+        <label for="usr_addr">Insert your address</label>
+        <br>
+        <input id ="usr_addr", name = "usr_addr", type="text" required>
+        <br>
+        <button type = "submit">login</button>
+    </form>
+
+    <br><br><br>
+    
+    <form method = "get" action = "/user/create">
+        <button type = "submit">create user</button>
+    </form>
+
+    <br>
 </div>
 
 
-
 <script>
+    function check_login(){
+        alert("checking login")
+        var addr = document.getElementById("usr_addr").value;
+        alert(addr)
 
-  var {bankContract} = require("../web3_init");
-  
-  function check_full(){
-    fetch("http://localhost:3000/check_full")
-    .then(data=>{
-      return data.text()
-    })
-    .then(data=>{
-      alert(data)
-    })
-  }
+        fetch ("http://localhost:3000/user/login?usr="+addr,
+        {
+            method:"GET",
+            mode: "cors",
+            cache: "no-cache",
+        })
+        .then((data)=>{
+            alert(".text:",data.text())
+            alert(".json:",data.json())
+            alert("response prima:",data.text())
+            return data.json()
+            
+        })
+        .then(data=>{
+            alert("response:",data)
+            if(data == "0") return false;
+            else return true;
 
-  function get_quantity(){
-    fetch("http://localhost:3000/quantity")
-    .then(data=>{
-      return data.text()
-    })
-    .then(data=>{
-      alert(data)
-    })
-  }
-
-  function get_owner(){
-    fetch("http://localhost:3000/owner")
-    .then(data=>{
-      return data.text()
-    })
-    .then(data=>{
-      alert(data)
-    })
-  }
-
-
+        })
+        .catch(err=>{
+            alert("err:",err)
+        })
+        return false;
+    }
 </script>

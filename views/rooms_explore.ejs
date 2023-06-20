@@ -1,0 +1,46 @@
+<%- include('./header.ejs') -%>
+
+<div>
+    <form  method="POST" onsubmit="check_send()">
+        <label for="user_address">Insert your address:</label>
+        <input id="user_address" type = "text" name="suser_address" required>
+        <br>
+        <label for="role">Select the role</label>
+        <select id="role" name="role" required>
+            <option value = "0">Student</option>
+            <option value = "1">Renter</option>
+        </select>
+        <br>
+        <button type = "submit">create</button>
+    </form>
+
+</div>
+
+<script>
+
+    function check_send(){
+        
+        var addr = document.getElementById("user_address").value
+        var is_addr = isAddress(addr)
+        if(!is_addr){
+            return false;
+        }
+        var role = Document.getElementById("role").value
+        fetch ("http://localhost:3000/user/create",{
+            method: "POST",
+            mode: "cors",
+            cache: "no-cache",
+            credentials: "same-origin",
+            headers: {
+            "Content-Type": "application/json",
+            // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            address: JSON.stringify(addr),
+            role: JSON.stringify(role),
+        }).then(response=>{
+            alert(response)
+        })
+
+    }
+
+</script>
