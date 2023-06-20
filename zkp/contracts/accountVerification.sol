@@ -4,7 +4,7 @@ pragma solidity >=0.8.2 <0.9.0;
 import "./ECDSA.sol";
 import "./Secp256k1.sol";
 import "./EllipticCurve.sol";
-import "./EllipticCurveFastMul.sol";
+import "./EllipticCurveFastMult.sol";
 
 //import "hardhat/console.sol";
 
