@@ -17,7 +17,7 @@ contract zkp{
     uint256 public N = Secp256k1.getN();
 
     function Prover(uint256 x) public view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
-            uint256 r = uint256(keccak256(abi.encodePacked(block.prevrandao, block.timestamp))) % N;
+            uint256 r = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % N;
             
             (uint256 hx,uint256 hy) = EllipticCurve.ecMul(x, GX, GY, AA, PP);
             (uint256 ux,uint256 uy) = EllipticCurve.ecMul(r, GX, GY, AA, PP);
