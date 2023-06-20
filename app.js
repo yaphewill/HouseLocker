@@ -9,17 +9,19 @@ var indexRouter = require('./routes/index');
 var sendRouter = require("./routes/send_money")
 // var removeRouter = require("./routes/remove")
 var userRouter = require('./routes/user');
-var contractInitRouter = require('./routes/start_contract');
+var contractInitRouter = require('./routes/start_contract.js');
 var roomsRouter = require('./routes/rooms');
 
 
 var app = express();
 
-const {web3,Web3} = require("./web3_init")
-const {Hash} = require("./mongoose_init")
+// const {web3,Web3} = require("./web3_init")
+// const {Hash} = require("./mongoose_init")
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
+// app.set('views', path.join(__dirname, 'views/student'));
+// app.set('views', path.join(__dirname, 'views/renter'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
@@ -54,6 +56,10 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+
+
 
 module.exports = app;
 

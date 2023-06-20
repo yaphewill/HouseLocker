@@ -1,0 +1,27 @@
+<%- include('../header.ejs') -%>
+<div>
+  <p display = "none" id ="user_local" value = <%=user%> ></p>
+  <p display = "none" id ="role_local" value = <%=role%> ></p>
+  <br>
+
+  <form method = "POST" action = "/rooms/create">
+    <label for="place">Address:</label><br>
+    <input id = "place" name = "place" type = "text" required><br><br>
+    <label for="num_beds">Number of beds in the room:</label><br>
+    <input id = "num_beds" name = "num_beds" type = "number" required><br><br>
+    <label for="monthly_fee">Monthly fee:</label><br>
+    <input id = "monthly_fee" name = "monthy fee" type = "number" required><br><br>
+    <label for="place">Expenses included:</label>
+    <input id = "expenses" name = "expenses" type = "checkbox"><br><br>
+    <label for="photo">Upload a photo:</label>
+    <input id ="photo" name = "photo" type = "file" accept =".jpg, .jpeg"><br><br>
+    <button type="submit">submit</button>
+  </form>
+
+</div>
+
+
+
+<script>
+</script>
+

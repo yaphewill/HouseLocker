@@ -2,6 +2,7 @@ var express = require('express');
 const { resource } = require('../app');
 var router = express.Router();
 const {User} = require("../mongoose_init")
+// var {user, role} = require("../global")
 
 
 
@@ -20,15 +21,18 @@ router.get("/login",(req,res)=>{
     // var response;
     if(el.length == 0) res.render("index")
     else{
-      console.log("el.role:",el[0].role)
-      global.user_address = addr;
-      global.user_role = el[0].role;
-      res.render("home", {title:"HouseLocker", user:"addr", role:el[0].role})
+      var rol = el[0].role;
+      console.log("el.role:",rol)
+      global.user = addr
+      global.role = rol
+      if(rol == "student")  res.render("student/home_student", {title:"HouseLocker", user:addr, role:rol})
+      else  res.render("renter/home_renter", {title:"HouseLocker", user:addr, role:rol})
+      
     }
 
   })
-  .catch(()=>{
-    res.status(500).send("not found")
+  .catch((err)=>{
+    res.status(500).send(err)
   })
 })
 
@@ -38,18 +42,21 @@ router.post("/create", (req,res)=>{
   // console.log(req)
   var addr = req.body.user_address;
 
-  var role = req.body.role;
-  console.log(addr,role)
+  var rol = req.body.role;
+  console.log(addr,rol)
 
   var query = {address:addr}
   User.find(query)
   .then((found)=>{
     console.log(found)
     if(found.length == 0){
-      const user1 = new User({address:addr, role:role})
+      const user1 = new User({address:addr, role:rol})
       user1.save();
       //TODO set global variable
-      res.render("home",{title:"hello"})
+      global.user = addr
+      global.role = rol
+      if(rol == "student")  res.render("student/home_student", {title:"HouseLocker", user:addr, role:rol})
+      else  res.render("renter/home_renter", {title:"HouseLocker", user:addr, role:rol})
     }
     else{
       res.send("Error: user aready exists")

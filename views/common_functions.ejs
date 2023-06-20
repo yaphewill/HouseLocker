@@ -29,4 +29,12 @@ function checkAddressChecksum(address) {
     }
     return true;
 };
+
+function set_globals(addr,role){
+    alert("Setting:",addr,role)
+    if(addr != undefined)   document.getElementById("user_global").innerText = addr;
+    if(role != undefined)   document.getElementById("role_global").innerText = role;
+};
+
+
 </script>

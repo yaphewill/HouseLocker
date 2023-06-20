@@ -1,5 +1,7 @@
-<%- include('./header.ejs') -%>
+<%- include('../header.ejs') -%>
 <div>
+  <p display = "none" id ="user_local" value = <%=user%> ></p>
+  <p display = "none" id ="role_local" value = <%=role%> ></p>
   <h1><%= title %></h1>
   <p>Welcome to <%= title %></p>
   <br>
@@ -52,6 +54,8 @@
     <input id = "account_input" type="text" name="account" >
     <button id="search_balance" type="submit">search</button>
   </form>
+  <br><br>
+  <button onclick="print_globals()">check global vars</button>
 
 </div>
 
@@ -59,8 +63,21 @@
 
 <script>
 
+
   var {rentContract} = require("../web3_init");
+  var globals = require("../global")
   
+  function onloading(){
+    document.getElementById("user_global").textContent = document.getElementById("user_local").value;
+    document.getElementById("role_global").textContent = document.getElementById("role_local").value;
+    // alert("setting")
+    // set_globals(document.getElementById("user_local").value,document.getElementById("role_local").value)
+  }
+
+  function print_globals(){
+    alert(document.getElementById("user_global").textContent)
+    alert(document.getElementById("role_global").textContent)
+  }
   function check_full(){
     fetch("http://localhost:3000/check_full")
     .then(data=>{
@@ -91,5 +108,8 @@
     })
   }
 
+  window.onload = onloading();
+
 
 </script>
+

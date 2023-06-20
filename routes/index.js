@@ -63,7 +63,7 @@ router.get("/balance", async (req,res)=>{
 })
 
 router.get("/home",(req,res)=>{
-  res.render("home",{title:"HouseLocker"})
+  res.render("student/home_student",{title:"HouseLocker"})
 })
 
 
