@@ -2,6 +2,7 @@ var express = require('express');
 const { resource } = require('../app');
 var router = express.Router();
 const {User} = require("../mongoose_init")
+var {web3,verificationContract} = require("../web3_init")
 // var {user, role} = require("../global")
 
 
@@ -21,6 +22,8 @@ router.get("/login",(req,res)=>{
     // var response;
     if(el.length == 0) res.render("index")
     else{
+
+
       var rol = el[0].role;
       console.log("el.role:",rol)
       global.user = addr

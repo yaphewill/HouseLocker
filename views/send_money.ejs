@@ -34,7 +34,7 @@
         var quantity = document.getElementById("quantity").value;
         var sender_address = document.getElementById("sender_address").value;
         var receiver_address = document.getElementById("receiver_address").value;
-        fetch ("http://localhost:3000/send_money",{
+        fetch ("https://localhost:3000/send_money",{
             method: "POST",
             mode: "cors",
             cache: "no-cache",

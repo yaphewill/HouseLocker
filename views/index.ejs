@@ -5,7 +5,7 @@
 
 
 
-    <form method = "GET" action = "/user/login">
+    <form method = "GET" action = "/user/login" onsubmit = "return verify_address()">
         <label for="usr_addr">Insert your address</label>
         <br>
         <input id ="usr_addr", name = "usr_addr", type="text" required>
@@ -28,32 +28,21 @@
 
 
 <script>
-    function check_login(){
-        alert("checking login")
+
+    const {web3, verificationContract} = require("../web3_init")
+
+    function verify_address(){
+        alert(web3.utils.toWei(0.0000001, "ether"))
         var addr = document.getElementById("usr_addr").value;
-        alert(addr)
-
-        fetch ("http://localhost:3000/user/login?usr="+addr,
-        {
-            method:"GET",
-            mode: "cors",
-            cache: "no-cache",
-        })
-        .then((data)=>{
-            alert(".text:",data.text())
-            alert(".json:",data.json())
-            alert("response prima:",data.text())
-            return data.json()
-            
-        })
-        .then(data=>{
-            alert("response:",data)
-            if(data == "0") return false;
-            else return true;
-
+        var key = document.getElementById("pr_key").value;
+        alert("vc:",verificationContract)
+        verificationContract.methods.verify(key,addr).call({from:addr})
+        .then(result=>{
+            alert(result)
+            return false;
         })
         .catch(err=>{
-            alert("err:",err)
+            alert(err)
         })
         return false;
     }

@@ -14,5 +14,6 @@ button:hover{
 } 
 
 body{
-background-color: #69ffeb;
+  /* background-color: #69ffeb; */
+  background-color: yellow;
 }

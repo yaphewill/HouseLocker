@@ -5,15 +5,7 @@
   <h1><%= title %></h1>
   <p>Welcome to <%= title %></p>
   <br>
-  <!-- <form method = "get" action = "/check_full">
-    <button type = "submit">check full</button>
-  </form> -->
-  <!-- <button id="check_full" onclick = "check_full()">check full</button>
-  <br><br>
-  <button id="get_quantity" onclick = "get_quantity()">get_quantity</button>
-  <br><br>
-  <button id="get_owner" onclick = "get_owner()">get_owner</button>
-  <br><br> -->
+
 
 
 <!-- 
@@ -76,7 +68,7 @@
     alert(document.getElementById("role_global").textContent)
   }
   function check_full(){
-    fetch("http://localhost:3000/check_full")
+    fetch("https://localhost:3000/check_full")
     .then(data=>{
       return data.text()
     })
@@ -86,7 +78,7 @@
   }
 
   function get_quantity(){
-    fetch("http://localhost:3000/quantity")
+    fetch("https://localhost:3000/quantity")
     .then(data=>{
       return data.text()
     })
@@ -96,7 +88,7 @@
   }
 
   function get_owner(){
-    fetch("http://localhost:3000/owner")
+    fetch("https://localhost:3000/owner")
     .then(data=>{
       return data.text()
     })
