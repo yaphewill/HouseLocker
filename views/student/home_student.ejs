@@ -1,7 +1,10 @@
 <%- include('../header.ejs') -%>
+<p style="display:none;" id ="user_local"><%=user%></p>
+<p style="display:none;" id ="role_local"><%=role%></p>
+
 <div>
-  <p display = "none" id ="user_local" value = <%=user%> ></p>
-  <p display = "none" id ="role_local" value = <%=role%> ></p>
+  <p display = "none" already_set=false id ="user_local" value = <%=user%> ></p>
+  <p display = "none" already_set=false id ="role_local" value = <%=role%> ></p>
   <h1><%= title %></h1>
   <p>Welcome to <%= title %></p>
   <br>
@@ -70,15 +73,29 @@
   function onloaded(){
     // document.getElementById("user_global").textContent = document.getElementById("user_local").value;
     // document.getElementById("role_global").textContent = document.getElementById("role_local").value;
-    document.localStorage.setItem("user_global", document.getElementById("user_local").value);
-    document.localStorage.setItem("role_global", document.getElementById("role_local").value)
+    var user_set = document.getElementById("user_local").getAttribute("already_set");
+    var role_set = document.getElementById("role_local").getAttribute("already_set");
+    var u_set=false;
+    var r_set=true;
+    if(user_set == "true") u_set=true;
+    if(role_set == "true") r_set=true;
+    
+    if(!u_set){
+      document.getElementById("user_local").setAttribute("already_set","true");
+      document.localStorage.setItem("user_global", document.getElementById("user_local").value);
+    }
+    if(!r_set){
+      document.getElementById("role_local").setAttribute("already_set","true");
+      document.localStorage.setItem("role_global", document.getElementById("role_local").value);
+    }
+
     // alert("setting")
     // set_globals(document.getElementById("user_local").value,document.getElementById("role_local").value)
   }
 
   function print_globals(){
-    alert(document.getElementById("user_global").textContent)
-    alert(document.getElementById("role_global").textContent)
+    alert(localStorage.getItem("user_global"))
+    alert(localStorage.getItem("role_global"))
   }
   function check_full(){
     fetch("http://localhost:3000/check_full")

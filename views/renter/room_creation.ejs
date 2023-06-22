@@ -1,9 +1,10 @@
 <%- include('../header.ejs') -%>
 <div>
+  <p already_set="" id ="user_local"><%=user%></p>
+  <p already_set="" id ="role_local"><%=role%></p>
 
   <br>
-
-  <form method = "POST" action = "/rooms/create" onsubmit="return set_renter()">
+  <form method="POST" action="/rooms/create">
     <label for="place">Address:</label><br>
     <input id = "place" name = "place" type = "text" required><br><br>
     <label for="num_beds">Number of beds in the room:</label><br>
@@ -12,16 +13,19 @@
     <input id = "monthly_fee" name = "monthly_fee" type = "number" required><br><br>
     <label for="place">Expenses included:</label>
     <input id = "expenses" name = "expenses" type = "checkbox"><br><br>
-    <button type="submit">submit</button>
-    <input type="hidden" id="renter">
-    
+    <input type="hidden" id="renter" name="renter"><br>
+    <button type="submit">create room</button>
   </form>
+  <!-- <button onclick="create_room()">create room</button> -->
 
-  
+  <button onclick="print_globals()">print globals</button>
 </div>
 
 <script>
 
+  function checking(){
+    alert(document.getElementById("renter").value)
+  }
   function loadFile(){
     let reader = new FileReader();
     reader.readAsDataURL(document.getElementById("photo").files[0]);
@@ -51,70 +55,69 @@
     reader.readAsDataURL(input.files[0]);
   }
 
-
-
 }
+
+function print_globals(){
+  alert(document.getElementById("user_local").innerText);
+  alert(document.getElementById("role_local").innerText);
+  alert(document.getElementById("renter").value)
+}
+
+// function create_room(){
+//   alert("lulu")
+//   fetch("http://localhost:8080/rooms/create", {
+//     method: "POST",
+//     mode: "cors",
+//     cache: "no-cache",
+//     credentials: "same-origin",
+//     headers: {
+//     "Content-Type": "application/json",
+//     // 'Content-Type': 'application/x-www-form-urlencoded',
+//     },
+//     renter: JSON.stringify(document.getElementById("user_local").innerText),
+//     place: JSON.stringify(document.getElementById("place").innerText),
+//     num_beds: JSON.stringify(document.getElementById("beds").innerText),
+//     monthly_fee: JSON.stringify(document.getElementById("monthly_fee").innerText),
+//     expenses: JSON.stringify(document.getElementById("expenses").innerText),
+//   })
+//   .then(res=>{
+//     alert("nakdjdjsadsdmsdsdsiamdsjdmsakjdsajd")
+//     alert(res)
+//   })
+// }
 </script>
 <script>
-  function set_renter(){
-    alert("user global:",document.localStorage.getItem("user_global"))
-    document.getElementById("renter").value = document.localStorage.getItem("user_global");
-    return false;
+
+  function onloaded2(){
+    // document.getElementById("user_global").textContent = document.getElementById("user_local").value;
+    // document.getElementById("role_global").textContent = document.getElementById("role_local").value;
+    var user_set = document.getElementById("user_local").getAttribute("already_set");
+    var role_set = document.getElementById("role_local").getAttribute("already_set");
+    var u_set=false;
+    var r_set=true;
+    if(user_set == "true") u_set=true;
+    if(role_set == "true") r_set=true;
+    alert(document.getElementById("user_local").innerText)
+    
+    if(!u_set){
+      alert("setting user")
+      document.getElementById("user_local").setAttribute("already_set","true");
+      localStorage.setItem("user_global", document.getElementById("user_local").innerText);
+    }
+    if(!r_set){
+      alert("seting_role")
+      document.getElementById("role_local").setAttribute("already_set","true");
+      localStorage.setItem("role_global", document.getElementById("role_local").innerText);
+    }
+    
+    document.getElementById("renter").value=document.getElementById("user_local").innerText;
+    // document.getElementById("renter").value=document.getElementById("user_local").innerText;
+    // alert("setting")
+    // set_globals(document.getElementById("user_local").value,document.getElementById("role_local").value)
   }
+
+  window.addEventListener("DOMContentLoaded",onloaded2())
+  
 </script>
 
-
-<!-- <div class="container">
-  <div class="row">
-    <div class="col-sm-8 mt-3">
-      <h4>Node.js upload images - bezkoder.com</h4>
-
-      <form class="mt-4"
-        action="/upload"
-        method="POST"
-        enctype="multipart/form-data"
-      >
-        <div class="form-group">
-          <input
-            type="file"
-            name="file"
-            id="input-files"
-            class="form-control-file border"
-          />
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-    </div>
-  </div>
-  <hr />
-  <div class="row">
-    <div class="col-sm-12">
-      <div class="preview-images"></div>
-    </div>
-  </div>
-</div>
-
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script>
-  $(document).ready(function() {
-    let imagesPreview = function(input, placeToInsertImagePreview) {
-      if (input.files) {
-        let filesAmount = input.files.length;
-        for (i = 0; i < filesAmount; i++) {
-          let reader = new FileReader();
-          reader.onload = function(event) {
-            $($.parseHTML("<img>"))
-              .attr("src", event.target.result)
-              .appendTo(placeToInsertImagePreview);
-          };
-          reader.readAsDataURL(input.files[i]);
-        }
-      }
-    };
-    $("#input-files").on("change", function() {
-      imagesPreview(this, "div.preview-images");
-    });
-  });
-</script> -->
 

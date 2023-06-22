@@ -17,6 +17,7 @@ const roomSchema = new mongoose.Schema({
     beds:Number,
     exp_included:Boolean,
     renter: String,
+    image:Number,
 })
 
 const Hash = mongoose.model('Hash', hashSchema);

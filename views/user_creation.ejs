@@ -4,7 +4,9 @@
 <div>
     <form action = "/user/create" method="POST" onsubmit="return check_send()">
         <label for="user_address">Insert your address:</label>
-        <input id="user_address" type = "text" name="user_address" required>
+        <input id="user_address" type = "text" name="user_address" required><br><br>
+        <label for="key">Insert your private key:</label>
+        <input id="key" type = "text" name="key" required>
         <br>
         <label for="role">Select the role</label>
         <select id="role" name="role" required>

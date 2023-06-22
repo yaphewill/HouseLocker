@@ -1,6 +1,6 @@
 <%- include('../header.ejs') -%>
-<p style="display:none;" id ="user_local"><%=user%></p>
-<p style="display:none;" id ="role_local"><%=role%></p>
+<p style="display:none;" already_set="" id ="user_local"><%=user%></p>
+<p style="display:none;" already_set="" id ="role_local"><%=role%></p>
 <div>
   <h1><%= title %></h1>
   <p>Welcome to <%= title %></p>
@@ -19,10 +19,12 @@
 
 
 
-
-  <form method = "get" action = "/rooms/create">
-    <button type = "submit">create room</button>
+  <form method="GET" action="/rooms/create">
+    <input type="hidden" name="user" id="userr">
+    <input type="hidden" name="role" id="rolee">
+    <button type="submit" >create room</button>
   </form>
+
   <br>
   <form method = "get" action = "/send_money">
     <button type = "submit">send money</button>
@@ -56,17 +58,11 @@
   var {rentContract} = require("../web3_init");
   var globals = require("../global")
   
-  function onloaded(){
 
-        document.localStorage.setItem("user_global", document.getElementById("user_local").textContent);
-        document.localStorage.setItem("role_global", document.getElementById("role_local").textContent)
-
-      }
 
   function print_globals(){
-    alert(document.getElementById("user_local").textContent)
-    alert(document.localStorage.getItem("user_global"))
-    alert(document.localStorage.getItem("role_global"))
+    alert(document.getElementById("userr").value)
+    alert(document.getElementById("rolee").value)
   }
   function check_full(){
     fetch("https://localhost:3000/check_full")
@@ -99,16 +95,58 @@
     })
   }
  
+  function room_creation(){
+    fetch("http://localhost:8080/rooms/create",{
+        method: "GET",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: {
+        "Content-Type": "application/json",
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        address: JSON.stringify(document.getElementById("user_local").innerText),
+        role: JSON.stringify(document.getElementById("role_local").innerText),
+    })
+  }
+
+  function onloaded2(){
+    // document.getElementById("user_global").textContent = document.getElementById("user_local").value;
+    // document.getElementById("role_global").textContent = document.getElementById("role_local").value;
+    var user_set = document.getElementById("user_local").getAttribute("already_set");
+    var role_set = document.getElementById("role_local").getAttribute("already_set");
+    var u_set=false;
+    var r_set=true;
+    if(user_set == "true") u_set=true;
+    if(role_set == "true") r_set=true;
+    // alert(document.getElementById("user_local").innerText)
+    
+    if(!u_set){
+      // alert("setting user")
+      document.getElementById("user_local").setAttribute("already_set","true");
+      localStorage.setItem("user_global", document.getElementById("user_local").innerText);
+    }
+    if(!r_set){
+      // alert("seting_role")
+      document.getElementById("role_local").setAttribute("already_set","true");
+      localStorage.setItem("role_global", document.getElementById("role_local").innerText);
+    }
+
+    document.getElementById("userr").value = document.getElementById("user_local").innerText;
+    document.getElementById("rolee").value = document.getElementById("role_local").innerText;
+    // alert("setting")
+    // set_globals(document.getElementById("user_local").value,document.getElementById("role_local").value)
+  }
   
 </script>
 
 <script>
+
   if (document.readyState !== 'loading') {
     console.log('document is already ready, just execute code here');
     onloaded();
   }
   else {
-      document.addEventListener('DOMContentLoaded', onloaded());
+      document.addEventListener('DOMContentLoaded', onloaded2());
   } 
 </script>
-

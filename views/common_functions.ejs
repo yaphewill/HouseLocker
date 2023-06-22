@@ -36,5 +36,31 @@ function set_globals(addr,role){
     if(role != undefined)   document.getElementById("role_global").innerText = role;
 };
 
+function onloaded(){
+    // document.getElementById("user_global").textContent = document.getElementById("user_local").value;
+    // document.getElementById("role_global").textContent = document.getElementById("role_local").value;
+    var user_set = document.getElementById("user_local").getAttribute("already_set");
+    var role_set = document.getElementById("role_local").getAttribute("already_set");
+    var u_set=false;
+    var r_set=true;
+    if(user_set == "true") u_set=true;
+    if(role_set == "true") r_set=true;
+    alert(document.getElementById("user_local").innerText)
+    
+    if(!u_set){
+      alert("setting user")
+      document.getElementById("user_local").setAttribute("already_set","true");
+      localStorage.setItem("user_global", document.getElementById("user_local").innerText);
+    }
+    if(!r_set){
+      alert("seting_role")
+      document.getElementById("role_local").setAttribute("already_set","true");
+      localStorage.setItem("role_global", document.getElementById("role_local").innerText);
+    }
+
+    // alert("setting")
+    // set_globals(document.getElementById("user_local").value,document.getElementById("role_local").value)
+  }
+
 
 </script>

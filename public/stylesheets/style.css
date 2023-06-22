@@ -58,11 +58,11 @@ body{
 }
 .infobox{
   position:fixed;
-  top:30%;
+  background-color: #ff10f0;
+  top:20%;
   right:18%;
   width:25%;
-  position:fixed;
   box-shadow: -4px 5px 7px #666666;
-  height:500px;
+  height:60%;
   border-radius: 10px;
 }
