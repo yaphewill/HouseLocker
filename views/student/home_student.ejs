@@ -67,9 +67,11 @@
   var {rentContract} = require("../web3_init");
   var globals = require("../global")
   
-  function onloading(){
-    document.getElementById("user_global").textContent = document.getElementById("user_local").value;
-    document.getElementById("role_global").textContent = document.getElementById("role_local").value;
+  function onloaded(){
+    // document.getElementById("user_global").textContent = document.getElementById("user_local").value;
+    // document.getElementById("role_global").textContent = document.getElementById("role_local").value;
+    document.localStorage.setItem("user_global", document.getElementById("user_local").value);
+    document.localStorage.setItem("role_global", document.getElementById("role_local").value)
     // alert("setting")
     // set_globals(document.getElementById("user_local").value,document.getElementById("role_local").value)
   }
@@ -108,7 +110,7 @@
     })
   }
 
-  window.onload = onloading();
+  document.addEventListener("DOMContentLoaded", onloaded())
 
 
 </script>

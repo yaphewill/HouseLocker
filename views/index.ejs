@@ -5,7 +5,8 @@
 
 
 
-    <form method = "GET" action = "/user/login" onsubmit = "return verify_address()">
+    <!-- <form method = "GET" action = "/user/login" onsubmit = "return verify_address()"> -->
+    <form method = "GET" action = "/user/login" onsubmit = "set_address()">
         <label for="usr_addr">Insert your address</label>
         <br>
         <input id ="usr_addr", name = "usr_addr", type="text" required>
@@ -46,4 +47,6 @@
         })
         return false;
     }
+
+    function set_address(){}
 </script>

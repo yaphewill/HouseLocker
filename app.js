@@ -12,6 +12,7 @@ var userRouter = require('./routes/user');
 var contractInitRouter = require('./routes/start_contract.js');
 var roomsRouter = require('./routes/rooms');
 
+// var localStorage = require('node-localstorage').LocalStorage;
 
 var app = express();
 

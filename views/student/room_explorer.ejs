@@ -1,16 +1,112 @@
 <%- include('../header.ejs') -%>
-<div>
-  
+<template>
+  <div class = "roombox" id="" name="" fee="" via="" renter="" onclick="show_info(this)"></div>
+</template>
+
+<div class="puppet" id="puppet" display = "none">
 </div>
 
+<div class="infobox" id="infobox" >
+  <p style="position:relative; padding:20px;" id = "p1" name = "via">Click a room to view details</p>
+  <p style="position:relative; padding:20px;" id = "p2" name = "fee"></p>
+  <p style="position:relative; padding:20px;" id = "p3" name="expenses"></p>
+  <p style="position:relative; padding:20px;" id = "renter" name = "renter"></p>
+</div>
 
+<div style = "background-color: yellow; top:0px; left:0px; width:100%; height:150px; position:fixed;"></div>
 
+<button onclick="back_home()" style="position:fixed; left:10%; top:40%;">Home</button>
 <script>
 
 function onloaded(){
-  alert("fully loaded")
+  fetch("http://localhost:8080/rooms/get/all",{
+    method:"GET",
+    cache:'no-cache',
+    headers:{
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(rooms =>{
+    return rooms.json()
+  })
+  .then(rooms=>{
+    
+    var i=0;
+    for (i=0; i<rooms.length; i++){
+
+      var via = rooms[i].address;
+      var beds = rooms[i].beds;
+      var fee = rooms[i].fee;
+      var id = rooms[i].id;
+      var renter = rooms[i].renter;
+
+      var item = document.getElementsByTagName("template")[0].content;
+      // alert(item)
+      var clone = document.importNode(item,true);
+      // alert(clone)
+      var body = clone.querySelector("div");
+      body.setAttribute('style', 'white-space: break-spaces;');
+      // alert(body)
+
+      body.setAttribute("id",id);
+      body.setAttribute("via",via);
+      body.setAttribute("beds",beds);
+      body.setAttribute("fee",fee);
+      body.setAttribute("renter",renter);
+
+      body.textContent = via + "\n " + beds +" letti\n "+ fee + " euro al mese"
+
+      // alert(body.textContent)
+      // var a = clone.querySelector("p");
+      // alert("aaa:",clone.getElementById("via"))
+      // clone.getElementById("via").textContent = via;
+      // clone.querySelector("p")[0].textContent = via;
+      // clone.querySelector("p")[1].textContent = beds;
+      // clone.querySelector("p")[2].textContent = fee;
+
+      document.getElementById("puppet").appendChild(clone)
+
+    }
+  })
+
 }
-window.addEventListener("DOMContentLoaded", onloaded())
+
+function back_home(){
+  location.assign("http://localhost:8080/student/home")
+}
+document.addEventListener("DOMContentLoaded", onloaded())
+
+
+function show_info(event){
+
+  // alert("showing")
+  var infos = document.getElementById("infobox")
+
+  // alert(event)
+  var via = event.getAttribute("via");
+  var beds = event.getAttribute("beds");
+  var fee = event.getAttribute("fee");
+  var id = event.getAttribute("id");
+  var renter = event.getAttribute("renter");
+  var text = "";
+  // infos.style.display="block";
+
+
+  // alert(infos.getElementsByTagName("p")[0])
+  if(beds == "1") infos.getElementsByTagName("p")[0].textContent = "Posto in camera singola in " + via;
+  else if(beds=="2") infos.getElementsByTagName("p")[0].textContent = "Posto in camera doppia in " + via;
+  else infos.getElementsByTagName("p")[0].textContent= "Post in camera da " + beds + " letti in " + via;
+
+  infos.getElementsByTagName("p")[1].textContent="\n\nAffitto mensile: " + fee;
+
+  if(fee) infos.getElementsByTagName("p")[2].textContent = "\n\n spese incluse";
+  else infos.getElementsByTagName("p")[2].textContent = "spese escluse"
+
+  infos.getElementsByTagName("p")[3].textContent = "per info: " + renter;
+
+
+}
 
 </script>
 

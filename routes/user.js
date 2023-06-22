@@ -20,6 +20,7 @@ router.get("/login",(req,res)=>{
   User.find(query)
   .then(el=>{
     // var response;
+    
     if(el.length == 0) res.render("index")
     else{
 
@@ -28,6 +29,8 @@ router.get("/login",(req,res)=>{
       console.log("el.role:",rol)
       global.user = addr
       global.role = rol
+      // localStorage.setItem("user_global",addr1)
+      // localStorage.setItem("role_global",rol);
       if(rol == "student")  res.render("student/home_student", {title:"HouseLocker", user:addr, role:rol})
       else  res.render("renter/home_renter", {title:"HouseLocker", user:addr, role:rol})
       

@@ -1,27 +1,120 @@
 <%- include('../header.ejs') -%>
 <div>
-  <p display = "none" id ="user_local" value = <%=user%> ></p>
-  <p display = "none" id ="role_local" value = <%=role%> ></p>
+
   <br>
 
-  <form method = "POST" action = "/rooms/create">
+  <form method = "POST" action = "/rooms/create" onsubmit="return set_renter()">
     <label for="place">Address:</label><br>
     <input id = "place" name = "place" type = "text" required><br><br>
     <label for="num_beds">Number of beds in the room:</label><br>
     <input id = "num_beds" name = "num_beds" type = "number" required><br><br>
     <label for="monthly_fee">Monthly fee:</label><br>
-    <input id = "monthly_fee" name = "monthy fee" type = "number" required><br><br>
+    <input id = "monthly_fee" name = "monthly_fee" type = "number" required><br><br>
     <label for="place">Expenses included:</label>
     <input id = "expenses" name = "expenses" type = "checkbox"><br><br>
-    <label for="photo">Upload a photo:</label>
-    <input id ="photo" name = "photo" type = "file" accept =".jpg, .jpeg"><br><br>
     <button type="submit">submit</button>
+    <input type="hidden" id="renter">
+    
   </form>
 
+  
 </div>
 
-
-
 <script>
+
+  function loadFile(){
+    let reader = new FileReader();
+    reader.readAsDataURL(document.getElementById("photo").files[0]);
+    alert("bu")
+    alert(document.getElementById("photo").files[0])
+    // var image = document.getElementById('output');
+    image.src = URL.createObjectURL(event.target.files[0]);
+  }
+  function elaborate_photo(){
+    alert(document.getElementById("photo").value)
+  }
+
+  function upload(){
+
+    alert(document.getElementById("photo").value)
+    document.getElementById("blah").src = document.getElementById("photo").value
+  }
+
+  function readURL(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+
+    reader.onload = function (e) {
+      $('#blah').attr('src', e.target.result).width(150).height(200);
+    };
+
+    reader.readAsDataURL(input.files[0]);
+  }
+
+
+
+}
 </script>
+<script>
+  function set_renter(){
+    alert("user global:",document.localStorage.getItem("user_global"))
+    document.getElementById("renter").value = document.localStorage.getItem("user_global");
+    return false;
+  }
+</script>
+
+
+<!-- <div class="container">
+  <div class="row">
+    <div class="col-sm-8 mt-3">
+      <h4>Node.js upload images - bezkoder.com</h4>
+
+      <form class="mt-4"
+        action="/upload"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="form-group">
+          <input
+            type="file"
+            name="file"
+            id="input-files"
+            class="form-control-file border"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+  </div>
+  <hr />
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="preview-images"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+  $(document).ready(function() {
+    let imagesPreview = function(input, placeToInsertImagePreview) {
+      if (input.files) {
+        let filesAmount = input.files.length;
+        for (i = 0; i < filesAmount; i++) {
+          let reader = new FileReader();
+          reader.onload = function(event) {
+            $($.parseHTML("<img>"))
+              .attr("src", event.target.result)
+              .appendTo(placeToInsertImagePreview);
+          };
+          reader.readAsDataURL(input.files[i]);
+        }
+      }
+    };
+    $("#input-files").on("change", function() {
+      imagesPreview(this, "div.preview-images");
+    });
+  });
+</script> -->
 
