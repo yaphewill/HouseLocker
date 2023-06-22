@@ -10,7 +10,11 @@
   "sourceMap": "224:1081:5:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",
   "deployedSourceMap": "224:1081:5:-:0;;;;;;;;",
   "source": "// SPDX-License-Identifier: MIT\r\n// OpenZeppelin Contracts (last updated v4.8.0) (utils/math/SignedMath.sol)\r\n\r\npragma solidity ^0.8.17;\r\n\r\n/**\r\n * @dev Standard signed math utilities missing in the Solidity language.\r\n */\r\nlibrary SignedMath {\r\n    /**\r\n     * @dev Returns the largest of two signed numbers.\r\n     */\r\n    function max(int256 a, int256 b) internal pure returns (int256) {\r\n        return a > b ? a : b;\r\n    }\r\n\r\n    /**\r\n     * @dev Returns the smallest of two signed numbers.\r\n     */\r\n    function min(int256 a, int256 b) internal pure returns (int256) {\r\n        return a < b ? a : b;\r\n    }\r\n\r\n    /**\r\n     * @dev Returns the average of two signed numbers without overflow.\r\n     * The result is rounded towards zero.\r\n     */\r\n    function average(int256 a, int256 b) internal pure returns (int256) {\r\n        // Formula from the book \"Hacker's Delight\"\r\n        int256 x = (a & b) + ((a ^ b) >> 1);\r\n        return x + (int256(uint256(x) >> 255) & (a ^ b));\r\n    }\r\n\r\n    /**\r\n     * @dev Returns the absolute unsigned value of a signed value.\r\n     */\r\n    function abs(int256 n) internal pure returns (uint256) {\r\n        unchecked {\r\n            // must be unchecked in order to support `n = type(int256).min`\r\n            return uint256(n >= 0 ? n : -n);\r\n        }\r\n    }\r\n}",
+<<<<<<< Updated upstream:zkp/build/contracts/SignedMath.json
   "sourcePath": "C:\\Users\\Feder\\OneDrive\\Documenti\\GitHub\\HouseLocker\\zkp\\contracts\\SignedMath.sol",
+=======
+  "sourcePath": "C:\\Users\\Feder\\OneDrive\\Documenti\\GitHub\\HouseLocker\\smart_contracts\\zkp\\contracts\\SignedMath.sol",
+>>>>>>> Stashed changes:smart_contracts/zkp/build/contracts/SignedMath.json
   "ast": {
     "absolutePath": "project:/contracts/SignedMath.sol",
     "exportedSymbols": {
@@ -1340,7 +1344,11 @@
   },
   "networks": {},
   "schemaVersion": "3.4.13",
+<<<<<<< Updated upstream:zkp/build/contracts/SignedMath.json
   "updatedAt": "2023-06-20T15:09:03.172Z",
+=======
+  "updatedAt": "2023-06-22T12:45:22.455Z",
+>>>>>>> Stashed changes:smart_contracts/zkp/build/contracts/SignedMath.json
   "devdoc": {
     "details": "Standard signed math utilities missing in the Solidity language.",
     "kind": "dev",

@@ -394,7 +394,11 @@
   "sourceMap": "63:1021:4:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",
   "deployedSourceMap": "63:1021:4:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;88:95;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;1003:76;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;329:30;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;190:95;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;292:30;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;919:78;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;829;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;468:94;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;743:78;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;657;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;366:95;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;571:78;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;88:95;117:66;88:95;:::o;1003:76::-;1040:7;496:66;1063:8;;1003:76;:::o;329:30::-;358:1;329:30;:::o;190:95::-;219:66;190:95;:::o;292:30::-;321:1;292:30;:::o;919:78::-;957:7;395:66;980:9;;919:78;:::o;829:::-;867:7;358:1;890:9;;829:78;:::o;468:94::-;496:66;468:94;:::o;743:78::-;781:7;743:78;:::o;657:::-;695:7;219:66;718:9;;657:78;:::o;366:95::-;395:66;366:95;:::o;571:78::-;609:7;117:66;632:9;;571:78;:::o;7:77:9:-;44:7;73:5;62:16;;7:77;;;:::o;90:126::-;185:24;203:5;185:24;:::i;:::-;180:3;173:37;90:126;;:::o;222:238::-;323:4;361:2;350:9;346:18;338:26;;374:79;450:1;439:9;435:17;426:6;374:79;:::i;:::-;222:238;;;;:::o",
   "source": "// SPDX-License-Identifier: MIT\r\n\r\npragma solidity >=0.7.3;\r\n\r\nlibrary Secp256k1 {\r\n    uint256 public constant GX = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798;\r\n    uint256 public constant GY = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8;\r\n    uint256 public constant AA = 0;\r\n    uint256 public constant BB = 7;\r\n    uint256 public constant PP = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F;\r\n    uint256 public constant N = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141;\r\n\r\n    function getGX() public pure returns (uint256){\r\n            return GX;\r\n    }\r\n\r\n    function getGY() public pure returns (uint256){\r\n            return GY;\r\n    }\r\n\r\n    function getAA() public pure returns (uint256){\r\n            return AA;\r\n    }\r\n\r\n    function getBB() public pure returns (uint256){\r\n            return BB;\r\n    }\r\n    \r\n    function getPP() public pure returns (uint256){\r\n            return PP;\r\n    }\r\n    function getN() public pure returns (uint256){\r\n            return N;\r\n    }\r\n\r\n}",
+<<<<<<< Updated upstream:zkp/build/contracts/Secp256k1.json
   "sourcePath": "C:\\Users\\Feder\\OneDrive\\Documenti\\GitHub\\HouseLocker\\zkp\\contracts\\Secp256k1.sol",
+=======
+  "sourcePath": "C:\\Users\\Feder\\OneDrive\\Documenti\\GitHub\\HouseLocker\\smart_contracts\\zkp\\contracts\\Secp256k1.sol",
+>>>>>>> Stashed changes:smart_contracts/zkp/build/contracts/Secp256k1.json
   "ast": {
     "absolutePath": "project:/contracts/Secp256k1.sol",
     "exportedSymbols": {
@@ -1188,9 +1192,22 @@
     "name": "solc",
     "version": "0.8.17+commit.8df45f5f.Emscripten.clang"
   },
+<<<<<<< Updated upstream:zkp/build/contracts/Secp256k1.json
   "networks": {},
   "schemaVersion": "3.4.13",
   "updatedAt": "2023-06-20T15:09:03.170Z",
+=======
+  "networks": {
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0x57095cBeFC4456F78BbC888f2c6f28B049D0C797",
+      "transactionHash": "0x2dd356cdc472f2afc3854e91ea304c368da4783508094cdb85af2fadfbce8164"
+    }
+  },
+  "schemaVersion": "3.4.13",
+  "updatedAt": "2023-06-22T12:45:22.453Z",
+>>>>>>> Stashed changes:smart_contracts/zkp/build/contracts/Secp256k1.json
   "devdoc": {
     "kind": "dev",
     "methods": {},
