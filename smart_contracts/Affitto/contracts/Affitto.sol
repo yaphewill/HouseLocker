@@ -2,6 +2,7 @@
 
 pragma solidity >= 0.7.0;
 //import "hardhat/console.sol";
+import "../../zkp/contracts/zkp.sol";
 
 contract Affitto {
 
@@ -57,10 +58,13 @@ contract Affitto {
         num_contracts = 0;
     }
 
-    function register_user(bool role_id) public {
+    function register_user(bool role_id, uint a, uint b, uint c, uint d, uint e, uint f) public {
+        require(zkp.Verifier(a, b, c, d, e, f) == true, "User is not the owner of the address");
+
         // Doesn't allow double registrations
         require(!user_info[msg.sender].already_init, "User already registered");
         uint256[] memory array;
+
         // false --> student, true --> renter
         if (role_id) {
             user_info[msg.sender] = user({
