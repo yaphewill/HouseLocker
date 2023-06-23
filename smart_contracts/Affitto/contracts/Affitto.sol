@@ -2,7 +2,7 @@
 
 pragma solidity >= 0.7.0;
 //import "hardhat/console.sol";
-import "../../zkp/contracts/zkp.sol";
+import "./zkp.sol";
 
 contract Affitto {
 
