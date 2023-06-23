@@ -108,8 +108,8 @@ router.post("/create", async (req, res) => {
 	var rol = req.body.role;
 	console.log("ROLE:",rol)
 
-	// var rrrr = check_if_correct2(addr,key);
-	// console.log("prove prima:",rrrr)
+	var r = false;
+	if(rol=="renter") r=true;
 
 	var is_correct = await check_if_correct2(addr, key);
 	console.log(is_correct)
@@ -127,6 +127,10 @@ router.post("/create", async (req, res) => {
 				var r = false;
 				if(rol=="renter") r=true;
 				console.log(r)
+				rentContract.methods.register_user(r).send({from:addr, gas:1000000})
+				.then(succ=>{
+					console.log(succ)
+				})
 				const user1 = new User({ address: addr, role: rol })
 				user1.save();
 				if (rol == "student") res.render("student/home_student", { title: "HouseLocker", user: addr, role: rol })

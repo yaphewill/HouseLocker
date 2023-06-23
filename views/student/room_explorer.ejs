@@ -137,6 +137,8 @@ function start_contract(){
   var rid = document.getElementById("current").getAttribute("rid");
   // alert(rid)
   var addr = document.getElementById("current").getAttribute("renter");
+  alert(addr)
+  alert(document.getElementById("user_local").textContent)
   // alert(addr)
   var k = (document.getElementById("current").getAttribute("rid")).slice(1,-1)
   var url = "http://localhost:8080/rooms/initialize?address="+addr+"&&rid="

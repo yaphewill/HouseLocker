@@ -15,7 +15,7 @@ const verificationContract = init_verification();
 function init_rent(){
 
     // console.log("a")
-    var rentAddress = "0x0c6A3c3f8E6CdeAE958a99A3022c86d07D211f47"; //TODO CHANGE IT
+    var rentAddress = "0xa4aefC6678124f7cA55dd5424b0025F89C03b380"; //TODO CHANGE IT
 
     const rent_abi = require("./smart_contracts/Affitto/build/contracts/Affitto.json")
 
@@ -28,7 +28,7 @@ function init_rent(){
 
 function init_verification(){
 
-    var verificationAddress = "0x8FF1898D435483393c087b4F6D5CF8b3159fF5c9"
+    var verificationAddress = "0x7963dbbE6ee80c7981743e81B0605DE519e6589c"
 
     const verification_abi = require("./smart_contracts/Affitto/build/contracts/accountVerification.json")
 

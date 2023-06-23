@@ -83,28 +83,14 @@ router.post("/initialize",(req,res)=>{
     var user = req.query.user;
     console.log("user",user)
 
-    rentContract.methods.initialize(addr, Number(rid)).send({from:user})
+    rentContract.methods.initialize(addr, Number(rid)).send({from:user, gas:10000000})
     .then(result=>{
         console.log(result)
     })
     .catch((err)=>{
         console.log(err);
     })
-    // .then(result=>{
-    //     console.log(result,"Successo");
-    //     res.send(result)
-    // })
-    // .catch(err=>{
-    //     res.send(err)
-    // })
-    // rentContract.methods.initialize(addr,Number(rid)).send({from:user})
-    // .then(result=>{
-    //     console.log(result,"Successo");
-    //     res.send(result)
-    // })
-    // .catch(err=>{
-    //     res.send(err)
-    // })
+
 })
 
 
