@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL - 3.0
 
 pragma solidity >= 0.7.0;
+//import "hardhat/console.sol";
 
 contract Affitto {
 
@@ -41,9 +42,13 @@ contract Affitto {
 
     address payable contract_address = payable(address(this));
     mapping(uint => contract_instance) contract_record;         // associa a ogni id la rispettiva struct di contratto
-    mapping(address => user) user_info;                        // associa a ogni indirizzo il suo ruolo (student: 0, renter: 1)
+    uint[] contract_record_keys;
+    mapping(address => user) user_info;
+    address[] user_info_keys;                        // associa a ogni indirizzo il suo ruolo (student: 0, renter: 1)
     mapping(address => uint[]) renters_rooms;                  // associa a ogni renter un array che contiene l'id delle sue stanze
-    mapping(uint => room) rooms_record;    
+    address[] renters_rooms_keys;
+    mapping(uint => room) rooms_record; 
+    uint[] rooms_record_keys;   
     uint conversion_rate = 586099570929370;                     // DA CHIEDERE ALL'ESTERNO?
     uint num_contracts;                                         // var globale che incremento a ogni nuovo contratto e la uso come id
 
@@ -55,13 +60,25 @@ contract Affitto {
     function register_user(bool role_id) public {
         // Doesn't allow double registrations
         require(!user_info[msg.sender].already_init, "User already registered");
-        uint256[] memory a = new uint256[](0);
+        uint256[] memory array;
         // false --> student, true --> renter
         if (role_id) {
-            user_info[msg.sender] = user({role: Role.Renter, room_record: a, num_rooms: 0, already_init: true});
+            user_info[msg.sender] = user({
+                role: Role.Renter, 
+                room_record: array, 
+                num_rooms: 0, 
+                already_init: true
+            });
+            user_info_keys.push(msg.sender);
         }
         else {
-            user_info[msg.sender] = user({role: Role.Student, room_record: a, num_rooms: 0, already_init: true});
+            user_info[msg.sender] = user({
+                role: Role.Student, 
+                room_record: array, 
+                num_rooms: 0, 
+                already_init: true
+            });
+            user_info_keys.push(msg.sender);
         }
         
     }
@@ -76,8 +93,9 @@ contract Affitto {
 
         for (uint i = 0; i < l; i++) {
             room memory new_room = room({id: rooms[i], owner: msg.sender, occupied: false, deposit: deposits[i]});
-            renters_rooms[msg.sender][i] = rooms[i];
+            renters_rooms[msg.sender].push(rooms[i]);
             rooms_record[new_room.id] = new_room;
+            rooms_record_keys.push(new_room.id);
         }
         
     }   
@@ -113,6 +131,7 @@ contract Affitto {
         });
 
         contract_record[new_id] = instance;
+        contract_record_keys.push(new_id);
         user_info[student].room_record.push(new_id);
         user_info[renter].room_record.push(new_id);
     }
@@ -171,6 +190,7 @@ contract Affitto {
         
         instance.amt_paid_student = paid_amount;
         instance.student_paid = true;
+        contract_record[contract_id] = instance;
         
     }
 
@@ -184,6 +204,7 @@ contract Affitto {
         require(paid_amount == conversion_rate * deposit, "Wrong amount paid"); 
         instance.amt_paid_renter = paid_amount;
         instance.renter_paid = true;
+        contract_record[contract_id] = instance;    
     }
 
     function withdraw_from_contract(uint contract_id) public {
@@ -224,7 +245,7 @@ contract Affitto {
         }
 
         if (instance.concluded_renter && instance.concluded_student) {
-            delete_contract_instance(student, renter, contract_id, instance.room_id);
+            delete_contract_instance(student, renter, contract_id);
             payable(student).transfer(instance.amt_paid_student);
             payable(renter).transfer(instance.amt_paid_renter);
             return true;
@@ -233,18 +254,62 @@ contract Affitto {
     }
 
 
-    function get_user_info(address add) public view returns (user memory) {
-        return user_info[add];
+    function get_user_info(address add) public view returns (bool, uint[] memory, uint, bool) {
+        user memory u = user_info[add];
+        bool role;
+        if (u.role == Role.Renter) {
+            role = true;
+        }
+        else {
+            role = false;
+        }
+        uint[] memory room_record = u.room_record;
+        uint num_rooms = u.num_rooms;
+        bool already_init = u.already_init;
+        return (role, room_record, num_rooms, already_init);
     }
 
-    function get_contract_info(uint256 contract_id) public view returns (contract_instance memory) {
-        return contract_record[contract_id];
+    function get_room_list(address a) public view returns (uint[] memory) {
+        return renters_rooms[a];
+    }
+
+    function get_contract_info(uint256 contract_id) public view returns (uint, uint, bool, bool, uint, uint, bool, bool, address, address) {
+        contract_instance memory instance = contract_record[contract_id];
+        return (contract_id, instance.room_id, instance.student_paid, instance.renter_paid, instance.amt_paid_student, instance.amt_paid_renter, instance.concluded_student, instance.concluded_renter, instance.student, instance.renter);
+    }
+
+    function get_deposit_in_wei(uint room_id) public view returns (uint){
+        uint deposit = rooms_record[room_id].deposit;
+        return (deposit * conversion_rate);
+    }
+
+    function get_room_info(uint room_id) public view returns (uint, address, bool, uint) {
+        room memory r = rooms_record[room_id];
+        uint id = r.id;
+        address owner = r.owner;
+        bool occupied = r.occupied;
+        uint deposit = r.deposit;
+        return (id, owner, occupied, deposit);
     }
 
 
-    function get_room_info(uint room_id) public view returns (room memory) {
-        return rooms_record[room_id];
-    }
+    /* function get_contract_record() public view {
+        for (uint i = 0; i < contract_record_keys.length; i++) {
+            (uint a, uint b, bool c, bool d, uint e, uint f, bool g, bool h, address j, address k) = get_contract_info(contract_record_keys[i]);
+            console.log(a);
+            console.log(b);
+            console.log(c);
+            console.log(d);
+            console.log(e);
+            console.log(f);
+            console.log(g);
+            console.log(h);
+            console.log(j);
+            console.log(k);
+            console.log("\n");
+            console.log("\n");
+        }
+    } */
 
     function check_if_already_paid(address addr, uint contract_id) public view returns (bool) {
         Role role = user_info[addr].role;
@@ -280,17 +345,18 @@ contract Affitto {
         
         // delete the contract instance
         delete(contract_record[contract_id]);
+        remove(contract_record_keys, contract_id);
 
         // mark the room as not occupied
         rooms_record[room_id].occupied = false;
         
         // modify the list of contract instances the addresses are a part of
         uint[] memory a1_record = user_info[a1].room_record;
-        uint[] memory a1_new_record = new uint[](a1_record.length - 1); // la lunghezza è uno in meno perché tolgo l'id di contratto dall'array
+        uint[] memory a1_new_record; // la lunghezza è uno in meno perché tolgo l'id di contratto dall'array
         uint[] memory a2_record = user_info[a2].room_record;
-        uint[] memory a2_new_record = new uint[](a2_record.length - 1);
+        uint[] memory a2_new_record;
 
-        
+
         for (uint i = 0; i < a1_record.length; i++) {
             if (a1_record[i] != contract_id) {
                 a1_new_record[i] = a1_record[i];
@@ -304,20 +370,38 @@ contract Affitto {
             }  
         }
         user_info[a2].room_record = a2_new_record;
-    } 
-
-    function string_to_uint(string memory s) private pure returns (uint) {
-        bytes memory b = bytes(s);
-        uint i;
-        uint result = 0;
-        for (i = 0; i < b.length; i++) {
-            uint c = uint(uint8(b[i]));
-            if (c >= 48 && c <= 57) {
-                result = result * 10 + (c - 48);
-            }
-        }
-        return result;
     }
+
+    // the contract ends successfully 
+    // the difference with the other delete_contract_instance is that the room doesn't get marked as free
+    function delete_contract_instance(address a1, address a2, uint contract_id) private {
+        
+        // delete the contract instance
+        delete(contract_record[contract_id]);
+        remove(contract_record_keys, contract_id);
+        
+        // modify the list of contract instances the addresses are a part of
+        uint[] memory a1_record = user_info[a1].room_record;
+        uint[] memory a1_new_record; // la lunghezza è uno in meno perché tolgo l'id di contratto dall'array
+        uint[] memory a2_record = user_info[a2].room_record;
+        uint[] memory a2_new_record;
+
+
+        for (uint i = 0; i < a1_record.length; i++) {
+            if (a1_record[i] != contract_id) {
+                a1_new_record[i] = a1_record[i];
+            }  
+        }
+        user_info[a1].room_record = a1_new_record; 
+
+        for (uint i = 0; i < a2_record.length; i++) {
+            if (a2_record[i] != contract_id) {
+                a2_new_record[i] = a2_record[i];
+            }  
+        }
+        user_info[a2].room_record = a2_new_record;
+    }  
+
 
     function check_if_user_already_registered(address addr) private view returns (bool) {
         return user_info[addr].already_init;
@@ -331,6 +415,35 @@ contract Affitto {
         emit Log("fall", msg.sender, msg.value, "");
     }
 
-    
+    function remove(uint[] storage array, uint element) private {
+        uint index;
+        bool found = false;
+        for(uint i = 0; i < array.length; i++) {
+            if (array[i] == element) {
+                index = i;
+                found = true;
+                break;
+            }
+        }
+        require(found, "Element not present in array");
+        array[index] = array[array.length - 1];
+        array.pop();
+    }
+
+    function remove(address[] storage array, address element) private {
+        uint index;
+        bool found = false;
+        for(uint i = 0; i < array.length; i++) {
+            if (array[i] == element) {
+                index = i;
+                found = true;
+                break;
+            }
+        }
+        require(found, "Element not present in array");
+        array[index] = array[array.length - 1];
+        array.pop();
+    }
+
 }
 
