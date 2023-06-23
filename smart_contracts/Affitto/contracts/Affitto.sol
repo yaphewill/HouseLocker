@@ -524,4 +524,3 @@ contract Affitto {
     }
 
 }
-

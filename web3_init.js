@@ -15,7 +15,7 @@ const verificationContract = init_verification();
 function init_rent(){
 
     // console.log("a")
-    var rentAddress = "0x0930C67a532C65035E8e054b1CD19a7217224818"; //TODO CHANGE IT
+    var rentAddress = "0x0c6A3c3f8E6CdeAE958a99A3022c86d07D211f47"; //TODO CHANGE IT
 
     const rent_abi = require("./smart_contracts/Affitto/build/contracts/Affitto.json")
 
@@ -28,9 +28,9 @@ function init_rent(){
 
 function init_verification(){
 
-    var verificationAddress = "0x4Ddd2851Ef209219B1619603129224AB51d4478C"
+    var verificationAddress = "0x8FF1898D435483393c087b4F6D5CF8b3159fF5c9"
 
-    const verification_abi = require("./smart_contracts/zkp/build/contracts/accountVerification.json")
+    const verification_abi = require("./smart_contracts/Affitto/build/contracts/accountVerification.json")
 
     var contractInstance = new web3.eth.Contract(verification_abi["abi"],verificationAddress);
 

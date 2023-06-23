@@ -11,6 +11,7 @@ contract accountVerification{
    
     // Takes in a private key and returns the corresponding public key
     // Everyone knows the input of a function. DO NOT USE IT IN A PUBLIC BLOCKCHAIN!
+
     function getPub_kFromPriv_k(bytes32 pr_k) public pure returns(bytes32, bytes32){
         (uint256 pub_key_x, uint256 pub_key_y) = EllipticCurve.ecMul(uint256(pr_k), Secp256k1.getGX(), Secp256k1.getGY(), Secp256k1.getAA(), Secp256k1.getPP());
         return (bytes32(pub_key_x), bytes32(pub_key_y));

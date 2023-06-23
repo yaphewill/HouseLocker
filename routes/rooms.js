@@ -31,15 +31,31 @@ router.post("/create",(req,res)=>{
     if(req.body.expenses == "on") exp = true;
     else exp = false;
     var min = 1
-    var max = 999999999999999999
+    var max = 1000
     var num = Math.floor(Math.random() * 3)
     var rid = Math.floor(Math.random() * (max - min + 1)) + min
+    var f = req.body.monthly_fee;
+    var r = req.body.renter;
+    console.log("ahoas")
+
+    var ri = [rid];
+    var fe = [f];
+    console.log(rid)
+    console.log(ri,fe)
+    rentContract.methods.register_rooms(ri,fe).send({from:r, gas:1000000})
+    .then(result=>{
+        console.log(result)
+        console.log("successo");
+    })
+    .catch(err=>{
+        console.log("error:",err);
+    })
     var room1 = new Room({
         id : rid,
         address : req.body.place,
         beds : req.body.num_beds,
         fee : req.body.monthly_fee,
-        exp_included : req.body.expenses,
+        exp_included : exp,
         renter: req.body.renter,
         image:num,
     })
@@ -48,11 +64,47 @@ router.post("/create",(req,res)=>{
 })
 
 router.get("/get/all", (req,res)=>{
-    var r = Room.find({})
+    Room.find({})
     .then(rooms=>{
         console.log(rooms)
+        console.log(rooms[0].id)
         res.send(rooms)
     })
+})
+
+
+router.post("/initialize",(req,res)=>{
+    // console.log(req)
+    var addr = req.query.address;
+    console.log("addr",addr);
+    var rid = req.query.rid;
+    console.log("rid",Number(rid));
+
+    var user = req.query.user;
+    console.log("user",user)
+
+    rentContract.methods.initialize(addr, Number(rid)).send({from:user})
+    .then(result=>{
+        console.log(result)
+    })
+    .catch((err)=>{
+        console.log(err);
+    })
+    // .then(result=>{
+    //     console.log(result,"Successo");
+    //     res.send(result)
+    // })
+    // .catch(err=>{
+    //     res.send(err)
+    // })
+    // rentContract.methods.initialize(addr,Number(rid)).send({from:user})
+    // .then(result=>{
+    //     console.log(result,"Successo");
+    //     res.send(result)
+    // })
+    // .catch(err=>{
+    //     res.send(err)
+    // })
 })
 
 

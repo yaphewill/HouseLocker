@@ -16,6 +16,6 @@ module.exports = async function(deployer){
     await deployer.link(secp,accountVerification);
     await deployer.deploy(accountVerification);
 
-    deployer.link(zkp,Affitto)
+    deployer.link(accountVerification,Affitto)
     await deployer.deploy(Affitto);
 };

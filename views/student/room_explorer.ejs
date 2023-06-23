@@ -6,6 +6,7 @@
   <div class = "roombox" id="" name="" fee="" via="" renter="" img_num = "" onclick="show_info(this)"></div>
 </template>
 
+<div style="display:none" id="current" rid="" renter=""></div>
 <div class="puppet" id="puppet" display = "none">
 </div>
 
@@ -15,15 +16,16 @@
   <p style="position:relative; padding:10px;" id = "p3" name="expenses"></p>
   <p style="position:relative; padding:10px;" id = "renter" name = "renter"></p>
   <img number="" src="" id="image" style="width:300px; height:200px;"><br><br><br><br>
-  <button id="start_contract" name="start_contract" style="padding:20px; bottom:5%; right:0px; position:absolute;"> contact renter</button>
 </div>
 
 <div style = "background-color: yellow; top:0px; left:0px; width:100%; height:150px; position:fixed;"></div>
 
-<button onclick="back_home()" style="position:fixed; left:10%; top:40%;">Home</button>
+<button onclick="back_home()" style="position:fixed; left:10%; top:40%;">Home</button><br>
+<button onclick="start_contract()" style="position:fixed; left:10%; top:60%;">Initialize contract</button>
 
 
 <script>
+
 
 function onloaded(){
   // alert("loading")
@@ -104,6 +106,9 @@ function show_info(event){
   var renter = event.getAttribute("renter");
   var img_num = event.getAttribute("img_num")
   var text = "";
+
+  document.getElementById("current").setAttribute("rid",id)
+  document.getElementById("current").setAttribute("renter",renter)
   // infos.style.display="block";
 
 
@@ -126,6 +131,38 @@ function show_info(event){
   }
 }
 
+
+function start_contract(){
+  // alert("AA")
+  var rid = document.getElementById("current").getAttribute("rid");
+  // alert(rid)
+  var addr = document.getElementById("current").getAttribute("renter");
+  // alert(addr)
+  var k = (document.getElementById("current").getAttribute("rid")).slice(1,-1)
+  var url = "http://localhost:8080/rooms/initialize?address="+addr+"&&rid="
+  +JSON.stringify(document.getElementById("current").getAttribute("rid")).slice(1,-1)
+  +"&&user="+document.getElementById("user_local").textContent;
+  alert(url);
+  fetch(url,{
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        headers: {
+        "Content-Type": "application/json",
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+    .then(result=>{
+      result.json();
+    })
+    .then(result=>{
+      console.log(result,"successo")
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+}
+
 </script>
 
 <script>
@@ -135,4 +172,10 @@ function show_info(event){
   else {
       document.addEventListener('DOMContentLoaded', onloaded());
   } 
+
+
+  // function initialize()
+
+
+
 </script>

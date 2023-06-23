@@ -11,7 +11,7 @@ const userchema = new mongoose.Schema({
 })
 
 const roomSchema = new mongoose.Schema({
-    id:BigInt,
+    id:Number,
     address:String,
     fee:Number,
     beds:Number,
