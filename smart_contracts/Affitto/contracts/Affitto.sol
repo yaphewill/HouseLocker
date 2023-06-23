@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL - 3.0
 
 pragma solidity >= 0.7.0;
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 /**
     @title Affitto. The contract allows for the registration of a user as either a student or a renter. The student
