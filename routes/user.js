@@ -150,6 +150,41 @@ router.post("/create", async (req, res) => {
 
 })
 
+router.get("/remove_me",async (req,res)=>{
+
+	var addr = req.query.address;
+	var cid = req.query.cid;
+	console.log(addr,cid);
+
+	rentContract.methods.withdraw_from_contract(cid).send({from:addr, gas:1000000})
+	.then(result=>{
+		console.log(result)
+		res.send("success");
+	})
+	.catch(err=>{
+		console.log(err)
+		res.send("error")
+	})
+
+})
+
+
+router.get("/i_paid",async(req,res)=>{
+	var user = req.query.user;
+	var cid = req.query.cid;
+	console.log(user,cid);
+
+	rentContract.methods.end_contract_successfully(cid).send({from:user, gas:1000000})
+	.then(succ=>{
+		console.log(succ);
+		res.send(succ);
+	})
+	.catch(err=>{
+		console.log(err);
+		res.send(err);
+	})
+})
+
 
 module.exports = router;
 
@@ -199,3 +234,7 @@ async function check_if_correct2(addr, key) {
 // 	var addr
 // 	rentContract.methods
 // })
+
+
+
+

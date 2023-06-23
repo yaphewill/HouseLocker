@@ -133,17 +133,17 @@ function show_info(event){
 
 
 function start_contract(){
-  // alert("AA")
+  alert("AA")
   var rid = document.getElementById("current").getAttribute("rid");
-  // alert(rid)
-  var addr = document.getElementById("current").getAttribute("renter");
-  alert(addr)
-  alert(document.getElementById("user_local").textContent)
-  // alert(addr)
+  var renter = document.getElementById("current").getAttribute("renter");
+  var user = document.getElementById("user_local").textContent
+  alert(renter)
+  alert(user)
+
   var k = (document.getElementById("current").getAttribute("rid")).slice(1,-1)
-  var url = "http://localhost:8080/rooms/initialize?address="+addr+"&&rid="
+  var url = "http://localhost:8080/rooms/initialize?address="+renter+"&&rid="
   +JSON.stringify(document.getElementById("current").getAttribute("rid")).slice(1,-1)
-  +"&&user="+document.getElementById("user_local").textContent;
+  +"&&user="+user;
   alert(url);
   fetch(url,{
         method: "POST",

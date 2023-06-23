@@ -291,8 +291,8 @@ contract Affitto {
 
     function end_contract_successfully(uint256 contract_id) public payable returns (bool) {
         contract_instance memory instance = contract_record[contract_id];
-        require(instance.student_paid, "Student has yet to pay");
-        require(instance.renter_paid, "Renter has yet to pay");
+        // require(instance.student_paid, "Student has yet to pay");
+        // require(instance.renter_paid, "Renter has yet to pay");
         address student;
         address renter;
         if (user_info[msg.sender].role == Role.Student) {

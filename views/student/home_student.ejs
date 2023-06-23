@@ -60,6 +60,20 @@
   <br><br>
   <button onclick="print_globals()">check global vars</button>
 
+  <br><br>
+  <form method="GET" action="/user/remove_me">
+    <input id="address" name="address" type="text"><br>
+    <input id="cid" name="cid" type="text"><br>
+    <button type="submit">remove from contract</button>
+  </form>
+
+  <br><br>
+  <form method="GET" action="/user/i_paid">
+    <input type="text" id="user" name="user"><br>
+    <input id="cid" name="cid" type="text"><br>
+    <button type="submit">i paid</button>
+  </form>
+
 </div>
 
 
