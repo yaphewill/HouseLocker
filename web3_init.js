@@ -5,7 +5,7 @@ const solc = require("solc");
 
 const Web3 = require("web3");
 // const { type } = require("os");
-const web3 = new Web3("http://localhost:7545")
+const web3 = new Web3("http://localhost:8545")
 
 
 const rentContract = init_rent();
