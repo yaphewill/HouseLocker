@@ -2,7 +2,16 @@
 
 pragma solidity >=0.7.3;
 
+/* 
+* This library contains all the paramater of the elliptic curve Secp256k1
+* given the general curve y^2 = x^3 + ax + b defined over Fp
+* a is AA, b is BB, PP is the prime p
+* GX and GY are the coordinates of the base point
+* N is the order of the point
+*/
+
 library Secp256k1 {
+    
     uint256 public constant GX = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798;
     uint256 public constant GY = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8;
     uint256 public constant AA = 0;
