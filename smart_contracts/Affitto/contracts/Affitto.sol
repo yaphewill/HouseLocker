@@ -4,7 +4,11 @@ pragma solidity >= 0.7.0;
 import "hardhat/console.sol";
 
 /**
-    @title fgndfgn
+    @title Affitto. The contract allows for the registration of a user as either a student or a renter. The student
+    can try out the service while the renter can register rooms. The student calls a function
+    (contract instance) to enter into a contract with the renter. You can withdraw but the other party takes your money.
+    When both parties agree, the contract is successfully terminated and the renter takes both's money (since the student's 
+    deposit will serve as an actual deposit for the legal lease).
     
 */
 
@@ -13,7 +17,19 @@ contract Affitto {
     // emitted in case the fallback or receive functions get invoked
     event Log(string func, address sender, uint256 value, bytes data);
 
-    /* 
+    /*  contract_instance contains all the information that needs to get track of when it comes to the contract instance
+        contract_id: the contract's uinque id
+        room_id: the room's unique id
+        student_paid: indicates whether the student has already paid the deposit
+        renter_paid: indicates whether the renter has already paid the deposit
+        amt_paid_student: amount paid by the student as a deposit. This amount is stored to make it easier when 
+                          the contract transfers back the money to the parties
+        amt_paid_renter: amount paid by the renter as a deposit. This amount is stored to make it easier when
+                          the contract transfers back the money to the parties 
+        concluded_student: indicates whether the student has already expressed the will to terminate the contract successfully
+        concluded_renter: indicates whether the renter has already expressed the will to terminate the contract successfully 
+        student: address of the student
+        renter: address of the renter            
     */
     struct contract_instance {
         uint256 contract_id;
@@ -82,10 +98,14 @@ contract Affitto {
     uint256 conversion_rate = 586099570929370;  
 
     // global variable that is used to assign unique ids to contract instances                   
-    uint256 num_contracts;                                         
+    uint256 num_contracts;      
+
+    // deposit paid by the renter as a guarantee of their good faith
+    uint256 renter_deposit;                                   
 
     constructor() {
         num_contracts = 0;
+        renter_deposit = 100;
     }
 
     /* @param role_id A boolean indicating whether the user is registering as a renter (true) or a student (false)
@@ -216,7 +236,7 @@ contract Affitto {
         
         require(room_found, "This renter's rooms are all already occupied"); 
 
-        // check che lo studente non sia già in una "istanza" di contratto o che la stanza non sia già occupata
+        // Check that neither the student and the renter are in a contract instance (the student is allowed to participate in only one contract instance at a time)
         require(check_if_already_in_contract(student, room_id) == false, "Student or room already in contract"); // controllare che l'inizializzazione venga interrotta e venga emesso il messaggio di errore
 
         uint256 new_id = num_contracts;
@@ -252,9 +272,8 @@ contract Affitto {
         uint256 contract_id = user_info[msg.sender].contract_instance_record[0];
         //console.log(contract_id);
         contract_instance memory instance = contract_record[contract_id];
-        uint256 deposit = rooms_record[instance.room_id].deposit;
         uint256 paid_amount = msg.value;
-        uint256 amt_to_pay = conversion_rate * deposit;
+        uint256 amt_to_pay = get_student_deposit_in_wei(instance.room_id);
         //console.log("Paid amount", paid_amount);
         //console.log("Amount to pay", amt_to_pay);
         require((amt_to_pay - 100000) <= paid_amount && paid_amount <= (amt_to_pay + 100000), "Wrong amount paid");
@@ -270,13 +289,12 @@ contract Affitto {
         The contract allows some tolerance on the amount received as the deposit
     */
     function renter_pay_deposit(uint256 contract_id) public payable {
-        uint256 renter_deposit = 100;
+        uint256 amt_to_pay = get_renter_deposit_in_wei();
         contract_instance memory instance = contract_record[contract_id];
         Role role = user_info[msg.sender].role;
         require(role == Role.Renter, "Data inconsistency"); // probabilmente inutile (già implicitamente incluso nel secondo require)
         require(msg.sender == instance.renter, "Data inconsistency");
         uint256 paid_amount = msg.value;
-        uint256 amt_to_pay = renter_deposit * conversion_rate;
         require((amt_to_pay - 100000) <= paid_amount && paid_amount <= (amt_to_pay + 100000), "Wrong amount paid"); 
         instance.amt_paid_renter = paid_amount;
         instance.renter_paid = true;
@@ -290,20 +308,26 @@ contract Affitto {
     */
     function withdraw_from_contract(uint256 contract_id) public {
         address receder = msg.sender;
+
         address other;
         contract_instance memory instance = contract_record[contract_id];
         if (user_info[msg.sender].role == Role.Student) {
+            // require also protects in case contract_id doesn't exist
+            require(instance.student == msg.sender, "You tried withdraw from a contract you are not a part of");
             other = contract_record[contract_id].renter;
         }
         else {
+            // require also protects in case contract_id doesn't exist
+            require(instance.renter == msg.sender, "You tried withdraw from a contract you are not a part of");
             other = contract_record[contract_id].student;
         }
         uint256 room_id = instance.room_id;
 
         delete_contract_instance(receder, other, contract_id, room_id);
         
+        uint256 amt_to_give_back = rooms_record[instance.room_id].deposit * conversion_rate;
         
-        payable(other).transfer(instance.amt_paid_student + instance.amt_paid_renter);
+        payable(other).transfer(amt_to_give_back + instance.amt_paid_renter);
     }
 
     /*  @param contract_id
@@ -312,7 +336,6 @@ contract Affitto {
         If both parties have concluded the contract, it calls an internal to delete this contract instance
          and transfer any funds paid to the renter
     */
-
     function end_contract_successfully(uint256 contract_id) public returns (bool) {
         contract_instance memory instance = contract_record[contract_id];
         require(instance.student_paid, "Student has yet to pay");
@@ -321,19 +344,20 @@ contract Affitto {
         address renter;
         if (user_info[msg.sender].role == Role.Student) {
             student = msg.sender;
-            require(instance.student == student);
+            require(instance.student == student, "You are trying to terminate a contract you are not a part of");
             instance.concluded_student = true;
             renter = instance.renter;
         }
         else if (user_info[msg.sender].role == Role.Renter){
             renter = msg.sender;
-            require(instance.renter == renter);
+            require(instance.renter == renter, "You are trying to terminate a contract you are not a part of");
             instance.concluded_renter = true;
             student = instance.student;
         }
 
         if (instance.concluded_renter && instance.concluded_student) {
-            payable(renter).transfer(instance.amt_paid_student);
+            uint256 amt_to_give_back = rooms_record[instance.room_id].deposit * conversion_rate;
+            payable(renter).transfer(amt_to_give_back);
             payable(renter).transfer(instance.amt_paid_renter);
             delete_contract_instance(student, renter, contract_id);
             return true;
@@ -369,9 +393,16 @@ contract Affitto {
         return (contract_id, instance.room_id, instance.student_paid, instance.renter_paid, instance.amt_paid_student, instance.amt_paid_renter, instance.concluded_student, instance.concluded_renter, instance.student, instance.renter);
     }
 
-    function get_deposit_in_wei(uint256 room_id) public view returns (uint256){
+    // returns the deposit for the blocked room in wei with the 10% added as the contract's fee for the service
+    function get_student_deposit_in_wei(uint256 room_id) public view returns (uint256) {
         uint256 deposit = rooms_record[room_id].deposit;
-        return (deposit * conversion_rate);
+        uint256 net_amt_in_wei = deposit * conversion_rate;
+        uint256 contract_gain = net_amt_in_wei / 10;
+        return (net_amt_in_wei + contract_gain); 
+    }
+
+    function get_renter_deposit_in_wei() public view returns (uint256) {
+        return (renter_deposit * conversion_rate);
     }
 
     function get_room_info(uint256 room_id) public view returns (uint256, address, bool, uint256) {
@@ -433,7 +464,7 @@ contract Affitto {
 
 
     function check_if_already_in_contract(address student, uint256 room_id) private view returns (bool) {
-        // controlla se lo studente o la stanza (disgiunzione inclusiva) sono già in un contratto
+        // checks if the student or the room are already in a contract instance
         
         uint256[] memory student_array = user_info[student].contract_instance_record;
 
