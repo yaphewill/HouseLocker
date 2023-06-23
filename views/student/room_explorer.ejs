@@ -10,11 +10,12 @@
 </div>
 
 <div class="infobox" id="infobox" >
-  <p style="position:relative; padding:20px;" id = "p1" name = "via">Click a room to view details</p>
-  <p style="position:relative; padding:20px;" id = "p2" name = "fee"></p>
-  <p style="position:relative; padding:20px;" id = "p3" name="expenses"></p>
-  <p style="position:relative; padding:20px;" id = "renter" name = "renter"></p>
-  <img number="" src="" id="image" style="width:300px; height:200px;">
+  <p style="position:relative; padding:10px;" id = "p1" name = "via">Click a room to view details</p>
+  <p style="position:relative; padding:10px;" id = "p2" name = "fee"></p>
+  <p style="position:relative; padding:10px;" id = "p3" name="expenses"></p>
+  <p style="position:relative; padding:10px;" id = "renter" name = "renter"></p>
+  <img number="" src="" id="image" style="width:300px; height:200px;"><br><br><br><br>
+  <button id="start_contract" name="start_contract" style="padding:20px; bottom:5%; right:0px; position:absolute;"> contact renter</button>
 </div>
 
 <div style = "background-color: yellow; top:0px; left:0px; width:100%; height:150px; position:fixed;"></div>
@@ -111,9 +112,9 @@ function show_info(event){
   else if(beds=="2") infos.getElementsByTagName("p")[0].textContent = "Posto in camera doppia in " + via;
   else infos.getElementsByTagName("p")[0].textContent= "Post in camera da " + beds + " letti in " + via;
 
-  infos.getElementsByTagName("p")[1].textContent="\n\nAffitto mensile: " + fee;
+  infos.getElementsByTagName("p")[1].textContent="Affitto mensile: " + fee;
 
-  if(fee) infos.getElementsByTagName("p")[2].textContent = "\n\n spese incluse";
+  if(fee) infos.getElementsByTagName("p")[2].textContent = "spese incluse";
   else infos.getElementsByTagName("p")[2].textContent = "spese escluse"
 
   infos.getElementsByTagName("p")[3].textContent = "per info: " + renter;

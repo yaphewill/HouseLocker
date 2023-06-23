@@ -2,11 +2,11 @@
 
 
 <div>
-    <form action = "/user/create" method="POST" onsubmit="return check_send()">
+    <form action = "/user/create" method="POST">
         <label for="user_address">Insert your address:</label>
         <input id="user_address" type = "text" name="user_address" required><br><br>
         <label for="key">Insert your private key:</label>
-        <input id="key" type = "text" name="key" required>
+        <input id="key" type = "password" name="key" required>
         <br>
         <label for="role">Select the role</label>
         <select id="role" name="role" required>
@@ -20,21 +20,5 @@
 </div>
 
 <script>
-
-    function check_send(){
-        
-        var addr = document.getElementById("user_address").value
-
-        if(!isAddress(addr)){
-            // alert("Nonono")
-            return false;
-        }
-        else return true
-        // alert(addr2)
-        
-        // var role = Document.getElementById("role").value
-
-
-    }
 
 </script>

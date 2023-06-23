@@ -1,10 +1,10 @@
 const { deploy } = require("truffle-contract/lib/execute");
 const { artifacts } = require("truffle")
-const fs = require('fs')
+// const fs = require('fs')
 const solc = require("solc");
 
 const Web3 = require("web3");
-const { type } = require("os");
+// const { type } = require("os");
 const web3 = new Web3("http://localhost:7545")
 
 
@@ -28,9 +28,9 @@ function init_rent(){
 
 function init_verification(){
 
-    var verificationAddress = "0xF25adA16314E689d0f8117704c163A45eF405d3a"
+    var verificationAddress = "0x4Ddd2851Ef209219B1619603129224AB51d4478C"
 
-    const verification_abi = require("./smart_contracts/Affitto/build/contracts/Affitto.json")
+    const verification_abi = require("./smart_contracts/zkp/build/contracts/accountVerification.json")
 
     var contractInstance = new web3.eth.Contract(verification_abi["abi"],verificationAddress);
 

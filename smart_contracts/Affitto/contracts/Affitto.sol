@@ -2,7 +2,7 @@
 
 pragma solidity >= 0.7.0;
 
-contract Prova {
+contract Affitto {
 
     event Log(string func, address sender, uint value, bytes data);
 

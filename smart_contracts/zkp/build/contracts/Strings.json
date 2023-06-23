@@ -18,9 +18,9 @@
       "type": "error"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"StringsInsufficientHexLength\",\"type\":\"error\"}],\"devdoc\":{\"details\":\"String operations.\",\"errors\":{\"StringsInsufficientHexLength(uint256,uint256)\":[{\"details\":\"The `value` string doesn't fit in the specified `length`.\"}]},\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Strings.sol\":\"Strings\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/Math.sol\":{\"keccak256\":\"0xe2098d25e34e8c71f1e3c285465220120eccf43305b36aae5d1d6f8f102e1073\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5f8344e0689b84db4145046d198af3c9a3be745ee85c0af69c9c7d8e01a51751\",\"dweb:/ipfs/QmSxCA2uHQyeiY2HZUFZXkz1XZnvnRdvUhDurvsLueGerZ\"]},\"project:/contracts/SignedMath.sol\":{\"keccak256\":\"0x550a70350ab99dd35c1410f61be6a6f8c03933e5d7a42de664fe2fafa85de395\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ed08b1807c546cfda7dbce59bcf43dad19506185df3a047cdaa47af880d4653e\",\"dweb:/ipfs/QmTBWWuq3NZzmkTeYtKUQX2sZ3Wce4sEv8VDtC4qf9PDFj\"]},\"project:/contracts/Strings.sol\":{\"keccak256\":\"0x24135497b4c88c6573cd906b4619a566d052b53560884736eacc575517995fdd\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://19e2f694ce348b1770dbd9190f915252a7aa47e99862bbf953c9776656ad6609\",\"dweb:/ipfs/QmY3MPg3x9hvWLXWa2AUr1RCpZ6a7dAyfBqapxtjuriRNq\"]}},\"version\":1}",
-  "bytecode": "0x6055604b600b8282823980515f1a607314603f577f4e487b71000000000000000000000000000000000000000000000000000000005f525f60045260245ffd5b305f52607381538281f3fe730000000000000000000000000000000000000000301460806040525f80fdfea26469706673582212205a7365f6a6b3c124a940782a38b6a1735c3b7a8f6ddce07008bc609aed50ade964736f6c63430008140033",
-  "deployedBytecode": "0x730000000000000000000000000000000000000000301460806040525f80fdfea26469706673582212205a7365f6a6b3c124a940782a38b6a1735c3b7a8f6ddce07008bc609aed50ade964736f6c63430008140033",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.17+commit.8df45f5f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"StringsInsufficientHexLength\",\"type\":\"error\"}],\"devdoc\":{\"details\":\"String operations.\",\"errors\":{\"StringsInsufficientHexLength(uint256,uint256)\":[{\"details\":\"The `value` string doesn't fit in the specified `length`.\"}]},\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Strings.sol\":\"Strings\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/Math.sol\":{\"keccak256\":\"0xe2098d25e34e8c71f1e3c285465220120eccf43305b36aae5d1d6f8f102e1073\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5f8344e0689b84db4145046d198af3c9a3be745ee85c0af69c9c7d8e01a51751\",\"dweb:/ipfs/QmSxCA2uHQyeiY2HZUFZXkz1XZnvnRdvUhDurvsLueGerZ\"]},\"project:/contracts/SignedMath.sol\":{\"keccak256\":\"0x550a70350ab99dd35c1410f61be6a6f8c03933e5d7a42de664fe2fafa85de395\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ed08b1807c546cfda7dbce59bcf43dad19506185df3a047cdaa47af880d4653e\",\"dweb:/ipfs/QmTBWWuq3NZzmkTeYtKUQX2sZ3Wce4sEv8VDtC4qf9PDFj\"]},\"project:/contracts/Strings.sol\":{\"keccak256\":\"0x24135497b4c88c6573cd906b4619a566d052b53560884736eacc575517995fdd\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://19e2f694ce348b1770dbd9190f915252a7aa47e99862bbf953c9776656ad6609\",\"dweb:/ipfs/QmY3MPg3x9hvWLXWa2AUr1RCpZ6a7dAyfBqapxtjuriRNq\"]}},\"version\":1}",
+  "bytecode": "0x60566050600b82828239805160001a6073146043577f4e487b7100000000000000000000000000000000000000000000000000000000600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea264697066735822122076250663a292b937e19fcd6354aa7a5538ac6d810c3ab6af4ad03d4e64cd249064736f6c63430008110033",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea264697066735822122076250663a292b937e19fcd6354aa7a5538ac6d810c3ab6af4ad03d4e64cd249064736f6c63430008110033",
   "immutableReferences": {},
   "generatedSources": [],
   "deployedGeneratedSources": [],
@@ -601,7 +601,7 @@
                         ]
                       },
                       "documentation": "@solidity memory-safe-assembly",
-                      "evmVersion": "shanghai",
+                      "evmVersion": "london",
                       "externalReferences": [
                         {
                           "declaration": 5041,
@@ -734,7 +734,7 @@
                               ]
                             },
                             "documentation": "@solidity memory-safe-assembly",
-                            "evmVersion": "shanghai",
+                            "evmVersion": "london",
                             "externalReferences": [
                               {
                                 "declaration": 5013,
@@ -3458,19 +3458,18 @@
         "src": "212:2836:6",
         "usedErrors": [
           5023
-        ],
-        "usedEvents": []
+        ]
       }
     ],
     "src": "101:2947:6"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.8.20+commit.a1b79de6.Emscripten.clang"
+    "version": "0.8.17+commit.8df45f5f.Emscripten.clang"
   },
   "networks": {},
   "schemaVersion": "3.4.14",
-  "updatedAt": "2023-06-22T13:02:30.095Z",
+  "updatedAt": "2023-06-23T08:25:24.526Z",
   "devdoc": {
     "details": "String operations.",
     "errors": {
