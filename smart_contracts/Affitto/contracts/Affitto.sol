@@ -141,7 +141,12 @@ contract Affitto {
         }
         
     }   
-    /*
+    /*  @param renter The address of the renter
+        @param room_id The id of the room
+
+        After performing some checks on the function caller and the renter, the function creates a contract instance with the information provided.
+        This function's version takes as a parameter also the room_id, in case the student has their heart already set on a specific room
+        
     
     */
     // If the student has his heart already set on a specific room 
@@ -153,13 +158,13 @@ contract Affitto {
 
         address payable student = payable(msg.sender);
         
-        // check che lo studente non sia già in una "istanza" di contratto o che la stanza non sia già occupata
-        require(check_if_already_in_contract(student, room_id) == false, "Student or room already in contract"); // controllare che l'inizializzazione venga interrotta e venga emesso il messaggio di errore
+        // check that the student is not in a contract instance and that the room is not occupied
+        require(check_if_already_in_contract(student, room_id) == false, "Student or room already in contract");
         
         // check that the renter is the room's owner
         require(rooms_record[room_id].owner == renter, "Inconsistency between room owner and renter");
 
-        // se né lo student né la stanza sono già in un contratto, possiamo procedere alla creazione della struct che rappresenta l'istanza del contratto
+        // if neither the student and the room are already in a contract instance, the function proceeds with the creation of the contract instance
         uint256 new_id = num_contracts;
         num_contracts++;
         rooms_record[room_id].occupied = true;
@@ -182,7 +187,12 @@ contract Affitto {
         user_info[renter].contract_instance_record.push(new_id);
     }
 
-    // if the student doesn't care about which room he gets assigned
+    /*  @param renter The address of the renter 
+
+        This version of the function doesn't take the room_id as an info, in case the student doesn't care about which room they get assigned
+        The student just gets assigned the first room available
+    
+    */
     function initialize(address payable renter) public {
         require(check_user_already_registered(msg.sender), "You are not an authorized user");
         require(check_user_already_registered(renter), "Renter is not an authorized user");
@@ -232,7 +242,9 @@ contract Affitto {
     
     }
 
-    
+    /*  The function allows the student to pay the deposit for the room he has locked in the contract instance
+        The contract allows some tolerance on the amount received as the deposit
+    */
     function student_pay_deposit() public payable {
         Role role = user_info[msg.sender].role;
         require(role == Role.Student);
@@ -253,6 +265,10 @@ contract Affitto {
         
     }
 
+    /*  @param contract_id
+        The function allows the student to pay the deposit for one of the rooms that are currently blocked in a contract instance
+        The contract allows some tolerance on the amount received as the deposit
+    */
     function renter_pay_deposit(uint256 contract_id) public payable {
         uint256 renter_deposit = 100;
         contract_instance memory instance = contract_record[contract_id];
@@ -267,9 +283,12 @@ contract Affitto {
         contract_record[contract_id] = instance;    
     }
 
+    /*  @param contract_id
+        The function allows either party to withdraw from their contract
+        The function calls an internal function named delete contract instance to delete this contract instance
+        and transfer any funds paid by either party to the other party
+    */
     function withdraw_from_contract(uint256 contract_id) public {
-        // IDEA: lo studente non può ritirarsi prima di aver pagato la caparra, oppure può ritirarsi gratuitamente nel lasso di tempo 
-        // che ha per pagare la caparra
         address receder = msg.sender;
         address other;
         contract_instance memory instance = contract_record[contract_id];
@@ -287,12 +306,17 @@ contract Affitto {
         payable(other).transfer(instance.amt_paid_student + instance.amt_paid_renter);
     }
 
-    
+    /*  @param contract_id
+        function allows either party to end their contract successfully.
+        It updates the contract instance to indicate that the sender has concluded the contract.
+        If both parties have concluded the contract, it calls an internal to delete this contract instance
+         and transfer any funds paid to the renter
+    */
 
-    function end_contract_successfully(uint256 contract_id) public payable returns (bool) {
+    function end_contract_successfully(uint256 contract_id) public returns (bool) {
         contract_instance memory instance = contract_record[contract_id];
-        // require(instance.student_paid, "Student has yet to pay");
-        // require(instance.renter_paid, "Renter has yet to pay");
+        require(instance.student_paid, "Student has yet to pay");
+        require(instance.renter_paid, "Renter has yet to pay");
         address student;
         address renter;
         if (user_info[msg.sender].role == Role.Student) {
@@ -465,13 +489,14 @@ contract Affitto {
         
         // modify the list of contract instances the addresses are a part of
         uint256[] memory a1_record = user_info[a1].contract_instance_record;
-        uint256[] memory a1_new_record; // la lunghezza è uno in meno perché tolgo l'id di contratto dall'array
+        uint256[] memory a1_new_record; 
         uint256[] memory a2_record = user_info[a2].contract_instance_record;
         uint256[] memory a2_new_record;
 
 
         for (uint256 i = 0; i < a1_record.length; i++) {
             if (a1_record[i] != contract_id) {
+                console.log(a1_record[i]);
                 a1_new_record[i] = a1_record[i];
             }  
         }
@@ -479,19 +504,13 @@ contract Affitto {
 
         for (uint256 i = 0; i < a2_record.length; i++) {
             if (a2_record[i] != contract_id) {
+                console.log(a1_record[i]);
                 a2_new_record[i] = a2_record[i];
             }  
         }
         user_info[a2].contract_instance_record = a2_new_record;
     }  
 
-    fallback() external payable {
-        emit Log("fallback", msg.sender, msg.value, msg.data);
-    }
-
-    receive() external payable {
-        emit Log("receive", msg.sender, msg.value, "");
-    }
 
     function remove(uint256[] storage array, uint256 element) private {
         uint256 index;
@@ -523,4 +542,12 @@ contract Affitto {
         array.pop();
     }
 
+    fallback() external payable {
+        emit Log("fallback", msg.sender, msg.value, msg.data);
+    }
+
+    receive() external payable {
+        emit Log("receive", msg.sender, msg.value, "");
+    }
 }
+
