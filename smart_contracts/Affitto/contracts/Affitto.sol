@@ -527,7 +527,7 @@ contract Affitto {
 
         for (uint256 i = 0; i < a1_record.length; i++) {
             if (a1_record[i] != contract_id) {
-                console.log(a1_record[i]);
+                //console.log(a1_record[i]);
                 a1_new_record[i] = a1_record[i];
             }  
         }
@@ -535,7 +535,7 @@ contract Affitto {
 
         for (uint256 i = 0; i < a2_record.length; i++) {
             if (a2_record[i] != contract_id) {
-                console.log(a1_record[i]);
+                //console.log(a1_record[i]);
                 a2_new_record[i] = a2_record[i];
             }  
         }
