@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: GPL - 3.0
 
 pragma solidity >= 0.7.0;
+
+import "./accountVerification.sol";
+import "./zkp.sol";
 //import "hardhat/console.sol";
 
+
 /**
-    @title Affitto. The contract allows for the registration of a user as either a student or a renter. The student
-    can try out the service while the renter can register rooms. The student calls a function
-    (contract instance) to enter into a contract with the renter. You can withdraw but the other party takes your money.
-    When both parties agree, the contract is successfully terminated and the renter takes both's money (since the student's 
+    @title Affitto. The contract allows for the registration of a user as either a student or a landlord. The student
+    can try out the service while the landlord can register rooms. The student calls a function
+    (contract instance) to enter into a contract with the landlord. You can withdraw but the other party takes your money.
+    When both parties agree, the contract is successfully terminated and the landlord takes both's money (since the student's 
     deposit will serve as an actual deposit for the legal lease).
     
 */
@@ -20,28 +24,32 @@ contract Affitto {
     /*  contract_instance contains all the information that needs to get track of when it comes to the contract instance
         contract_id: the contract's uinque id
         room_id: the room's unique id
+        student: address of the student
+        landlord: address of the landlord    
         student_paid: indicates whether the student has already paid the deposit
-        renter_paid: indicates whether the renter has already paid the deposit
+        landlord_paid: indicates whether the landlord has already paid the deposit
         amt_paid_student: amount paid by the student as a deposit. This amount is stored to make it easier when 
                           the contract transfers back the money to the parties
-        amt_paid_renter: amount paid by the renter as a deposit. This amount is stored to make it easier when
-                          the contract transfers back the money to the parties 
+        amt_paid_landlord: amount paid by the landlord as a deposit. This amount is stored to make it easier when
+                           the contract transfers back the money to the parties 
         concluded_student: indicates whether the student has already expressed the will to terminate the contract successfully
-        concluded_renter: indicates whether the renter has already expressed the will to terminate the contract successfully 
-        student: address of the student
-        renter: address of the renter            
+        concluded_landlord: indicates whether the landlord has already expressed the will to terminate the contract successfully 
+        creation_time: timestamp of the moment the contract instance was created
+        contract_phase: the phase the contract is currently in        
     */
     struct contract_instance {
         uint256 contract_id;
         uint256 room_id;
-        bool student_paid;
-        bool renter_paid;
-        uint256 amt_paid_student;
-        uint256 amt_paid_renter;
-        bool concluded_student;
-        bool concluded_renter;
         address payable student;
-        address payable renter;
+        address payable landlord;
+        bool student_paid;
+        bool landlord_paid;
+        uint256 amt_paid_student;
+        uint256 amt_paid_landlord;
+        bool concluded_student;
+        bool concluded_landlord;
+        uint256 creation_time;
+        ContractPhase contract_phase;
     }
 
     /*  id: room id
@@ -56,7 +64,7 @@ contract Affitto {
         uint256 deposit;
     }
 
-    /*  role: specifies the role of the user, who can be either a student or a renter
+    /*  role: specifies the role of the user, who can be either a student or a landlord
         contract_instance_record: keeps track of the contract instances the user is currently a part of. 
                                   A student can only participate in one contract instance at a time
         num_rooms: number of rooms that a user owns. A student can't own any room
@@ -74,115 +82,163 @@ contract Affitto {
     }
 
     enum Role {
-        Renter,
+        Landlord,
         Student
+    }
+
+    /*  ContractPhase identifies the phase in which the contract instance can be
+        INITIAL PHASE: it's the phase where one or both parties still have to pay their deposit. 
+        This phase has a maximum duration which will be set at the application level. 
+        This phase can be terminated in three ways:
+            - The moment both parties pay for the deposit, the initial phase is concluded and the contract becomes STABLE
+            - If one of the parties withdraws from the contract in this phase, then there are no penalties, if they or the other 
+              party has already paid the money is given back to the respective parties (except for the revenue percentage 
+              taken from the student's deposit, it they have already paid). Ther, the contract instance is deleted
+            - If the maximum duration of this phase is reached. Then, the contract instance is deleted
+        
+        STABLE PHASE: it's the phase where both parties have paid their deposit and it's the phase in which the contract simply exist.
+        This phase can be terminated in two ways:
+            - If one party withdraws, all the money deposited in the contract, minus the percentage earned by the contract, is given to the other party
+            - If both parties agree that the contract can end successfully, then all the money, minus the percentage earned by the contract, is given to the landlord
+        
+        HYBERNATED PHASE: When a party suspects the other of malevolent behavior, it can block the contract instance in an hybernated phase.
+        This phase waits for the competent autorities to run the necessary checks on the reality of the situation and to decide which party 
+        deserves the money deposited in the contract.
+    */
+    enum ContractPhase {
+        Initial,
+        Stable,
+        Hybernated
     }
 
     // associates to each contract id the respective contract record
     mapping(uint256 => contract_instance) contract_record;
-    //uint256[] contract_record_keys;
+    uint256[] contract_record_keys;
 
     // associates to each address its respective user information
     mapping(address => user) user_info;  
     //address[] user_info_keys;
 
-    // associates to each renter an array that contains their rooms' id                 
-    mapping(address => uint256[]) renters_rooms;                
-    //address[] renters_rooms_keys;
+    // associates to each landlord an array that contains their rooms' id                 
+    mapping(address => uint256[]) landlords_rooms;                
+    //address[] landlords_rooms_keys;
 
     // associates to each room id the corresponding room information
     mapping(uint256 => room) rooms_record;
     //uint256[] rooms_record_keys; 
     
+    // contains all the ids of the hybernated contracts and the address of the party that hybernated them
+    mapping(uint256 => address) hybernated_contracts;
+
     // conversion rate from eur to wei
     uint256 conversion_rate = 586099570929370;  
 
     // global variable that is used to assign unique ids to contract instances                   
     uint256 num_contracts;      
 
-    // deposit paid by the renter as a guarantee of their good faith
-    uint256 renter_deposit;                                   
+    // deposit paid by the landlord as a guarantee of their good faith
+    uint256 landlord_deposit; 
+
+    uint256 time_limit_to_make_contract_stable;                                  
 
     constructor() {
-        num_contracts = 0;
-        renter_deposit = 100;
+        num_contracts = 1; // num_contracts start at 1 and not 0 because 0 is the default value for uint256 so we excluded it to avoid possible ambiguities
+        landlord_deposit = 100;
+        time_limit_to_make_contract_stable = 172800;  // it's the equivalent, in seconds, of 48 hours
     }
 
-    /* @param role_id A boolean indicating whether the user is registering as a renter (true) or a student (false)
-       
-       The function allows the user to register either as a renter or a student. The function prevents double registrations by checking the 'already init' field
+    /* @param ux, uy, c, z, hx, hy are the values outputted by the prover called on the user's private key
+
+       The function allows the user to register either as a landlord or a student. The function prevents double registrations by checking the 'already init' field
        in the user struct. 
     
     */
-    function register_user(bool role_id) public {
+    function register_landlord(uint256 ux, uint256 uy, uint256 c, uint256 z, uint256 hx, uint256 hy) public {
         // Doesn't allow double registrations
         require(!user_info[msg.sender].already_init, "User already registered");
+
+        // call to the verifier to perform the account verification
+        require(accountVerification.zkp_accountVer(ux, uy, c, z, hx, hy, msg.sender), "Account verification failed.");
+
         uint256[] memory array;
-        // false --> student, true --> renter
-        if (role_id) {
-            user_info[msg.sender] = user({
-                role: Role.Renter, 
-                contract_instance_record: array, 
-                num_rooms: 0, 
-                already_init: true
-            });
-            //user_info_keys.push(msg.sender);
-        }
-        else {
-            user_info[msg.sender] = user({
+        user_info[msg.sender] = user({
+            role: Role.Landlord, 
+            contract_instance_record: array, 
+            num_rooms: 0, 
+            already_init: true
+        });
+        //user_info_keys.push(msg.sender);
+        
+    }
+
+    /*  @param ux, uy, c, z, hx, hy are the values outputted by the prover called on the user's private key
+        @param ux_stud, uy_stud, c_stud, z_stud, hx_stud, hy_stud are the values outputted by the 
+        Prover called on the private information demonstrating the user's status as a student
+    */
+    function register_student(uint256 ux, uint256 uy, uint256 c, uint256 z, uint256 hx, uint256 hy, uint256 ux_stud, uint256 uy_stud, uint256 c_stud, uint256 z_stud, uint256 hx_stud, uint256 hy_stud) public {
+        // Doesn't allow double registrations
+        require(!user_info[msg.sender].already_init, "User already registered");
+
+        // call to the verifier to perform the account verification
+        require(accountVerification.zkp_accountVer(ux, uy, c, z, hx, hy, msg.sender), "Account verification failed.");
+
+        // call to the verifier to perform the check on the user's status as a student
+        // the application will have already performed a search on the presence of hx_stud and hy_stud 
+        // in the public database, so the function only needs to check that the verifiers outputs the value 'true'
+        require(zkp.Verifier(ux_stud, uy_stud, c_stud, z_stud, hx_stud, hy_stud), "Was not able to varify that the user is a student");
+        
+        uint256[] memory array;
+        
+        user_info[msg.sender] = user({
                 role: Role.Student, 
                 contract_instance_record: array, 
                 num_rooms: 0, 
                 already_init: true
             });
             //user_info_keys.push(msg.sender);
-        }
-        
     }
 
     /*  @param rooms Array with the rooms ids
         @param deposits The deposit to pay for the corresponding room
 
-        The renter can register several rooms at once by providing the ids of the rooms, it adds the new room structs to the rooms_record_mapping
+        The landlord can register several rooms at once by providing the ids of the rooms, it adds the new room structs to the rooms_record_mapping
     */
 
     function register_rooms(uint256[] memory rooms, uint256[] memory deposits) public {
-        // controlliamo che il chiamante sia un renter
-        require(user_info[msg.sender].role == Role.Renter, "You are not a renter therefore you're not allowed to register rooms");
+        // controlliamo che il chiamante sia un landlord
+        require(user_info[msg.sender].role == Role.Landlord, "You are not a landlord therefore you're not allowed to register rooms");
         require(rooms.length == deposits.length, "Inconsistent information provided.");
         uint256 l = rooms.length;
         user_info[msg.sender].num_rooms += l; 
 
         for (uint256 i = 0; i < l; i++) {
             room memory new_room = room({id: rooms[i], owner: msg.sender, occupied: false, deposit: deposits[i]});
-            renters_rooms[msg.sender].push(rooms[i]);
+            landlords_rooms[msg.sender].push(rooms[i]);
             rooms_record[new_room.id] = new_room;
             //rooms_record_keys.push(new_room.id);
         }
         
     }   
-    /*  @param renter The address of the renter
+    /*  @param landlord The address of the landlord
         @param room_id The id of the room
-
-        After performing some checks on the function caller and the renter, the function creates a contract instance with the information provided.
+        @param timestamp time of the creation of the contract instance
+        After performing some checks on the function caller and the landlord, the function creates a contract instance with the information provided.
         This function's version takes as a parameter also the room_id, in case the student has their heart already set on a specific room
-        
-    
     */
     // If the student has his heart already set on a specific room 
-    function initialize(address payable renter, uint256 room_id) public {
+    function initialize(address payable landlord, uint256 room_id, uint256 timestamp) public {
         require(check_user_already_registered(msg.sender), "You are not an authorized user");
-        require(check_user_already_registered(renter), "Renter is not an authorized user");
+        require(check_user_already_registered(landlord), "landlord is not an authorized user");
         require(user_info[msg.sender].role == Role.Student, "You are not a student");
-        require(user_info[renter].role == Role.Renter, "The address provided does not correspond to a renter");
+        require(user_info[landlord].role == Role.Landlord, "The address provided does not correspond to a landlord");
 
         address payable student = payable(msg.sender);
         
         // check that the student is not in a contract instance and that the room is not occupied
         require(check_if_already_in_contract(student, room_id) == false, "Student or room already in contract");
         
-        // check that the renter is the room's owner
-        require(rooms_record[room_id].owner == renter, "Inconsistency between room owner and renter");
+        // check that the landlord is the room's owner
+        require(rooms_record[room_id].owner == landlord, "Inconsistency between room owner and landlord");
 
         // if neither the student and the room are already in a contract instance, the function proceeds with the creation of the contract instance
         uint256 new_id = num_contracts;
@@ -190,34 +246,36 @@ contract Affitto {
         rooms_record[room_id].occupied = true;
         contract_instance memory instance = contract_instance({
             contract_id: new_id, 
-            room_id: room_id, 
-            student_paid: false, 
-            renter_paid: false, 
-            amt_paid_student: 0, 
-            amt_paid_renter: 0, 
-            concluded_student: false, 
-            concluded_renter: false, 
+            room_id: room_id,
             student: student, 
-            renter: renter
+            landlord: landlord, 
+            student_paid: false, 
+            landlord_paid: false, 
+            amt_paid_student: 0, 
+            amt_paid_landlord: 0, 
+            concluded_student: false, 
+            concluded_landlord: false, 
+            creation_time: timestamp,
+            contract_phase: ContractPhase.Initial
         });
 
         contract_record[new_id] = instance;
-        //contract_record_keys.push(new_id);
+        contract_record_keys.push(new_id);
         user_info[student].contract_instance_record.push(new_id);
-        user_info[renter].contract_instance_record.push(new_id);
+        user_info[landlord].contract_instance_record.push(new_id);
     }
 
-    /*  @param renter The address of the renter 
+    /*  @param landlord The address of the landlord 
 
         This version of the function doesn't take the room_id as an info, in case the student doesn't care about which room they get assigned
         The student just gets assigned the first room available
     
     */
-    function initialize(address payable renter) public {
+    function initialize(address payable landlord, uint256 timestamp) public {
         require(check_user_already_registered(msg.sender), "You are not an authorized user");
-        require(check_user_already_registered(renter), "Renter is not an authorized user");
+        require(check_user_already_registered(landlord), "landlord is not an authorized user");
         require(user_info[msg.sender].role == Role.Student, "You are not a student");
-        require(user_info[renter].role == Role.Renter, "The address provided does not correspond to a renter");
+        require(user_info[landlord].role == Role.Landlord, "The address provided does not correspond to a landlord");
         address payable student = payable(msg.sender);
 
         
@@ -226,17 +284,17 @@ contract Affitto {
         bool room_found = false;
 
         // Checks if the owner has any rooms available
-        for (uint256 i = 0; i < user_info[renter].num_rooms; i++) {
-            if (!rooms_record[renters_rooms[renter][i]].occupied) {
+        for (uint256 i = 0; i < user_info[landlord].num_rooms; i++) {
+            if (!rooms_record[landlords_rooms[landlord][i]].occupied) {
                 room_found = true;
-                room_id = rooms_record[renters_rooms[renter][i]].id;
+                room_id = rooms_record[landlords_rooms[landlord][i]].id;
                 break;
             }
         }
         
-        require(room_found, "This renter's rooms are all already occupied"); 
+        require(room_found, "This landlord's rooms are all already occupied"); 
 
-        // Check that neither the student and the renter are in a contract instance (the student is allowed to participate in only one contract instance at a time)
+        // Check that neither the student and the landlord are in a contract instance (the student is allowed to participate in only one contract instance at a time)
         require(check_if_already_in_contract(student, room_id) == false, "Student or room already in contract"); // controllare che l'inizializzazione venga interrotta e venga emesso il messaggio di errore
 
         uint256 new_id = num_contracts;
@@ -245,19 +303,21 @@ contract Affitto {
         contract_instance memory instance = contract_instance({
             contract_id: new_id, 
             room_id: room_id, 
-            student_paid: false, 
-            renter_paid: false, 
-            amt_paid_student: 0, 
-            amt_paid_renter: 0, 
-            concluded_student: false, 
-            concluded_renter: false, 
             student: student, 
-            renter: renter
+            landlord: landlord,
+            student_paid: false, 
+            landlord_paid: false, 
+            amt_paid_student: 0, 
+            amt_paid_landlord: 0, 
+            concluded_student: false, 
+            concluded_landlord: false, 
+            creation_time: timestamp,
+            contract_phase: ContractPhase.Initial
         });
         contract_record[new_id] = instance;
-        //contract_record_keys.push(new_id);
+        contract_record_keys.push(new_id);
         user_info[student].contract_instance_record.push(new_id);
-        user_info[renter].contract_instance_record.push(new_id);
+        user_info[landlord].contract_instance_record.push(new_id);
 
     
     }
@@ -278,9 +338,14 @@ contract Affitto {
         //console.log("Amount to pay", amt_to_pay);
         require((amt_to_pay - 100000) <= paid_amount && paid_amount <= (amt_to_pay + 100000), "Wrong amount paid");
         
+        if (instance.landlord_paid) {
+            instance.contract_phase = ContractPhase.Stable;
+        }
+
         instance.amt_paid_student = paid_amount;
         instance.student_paid = true;
         contract_record[contract_id] = instance;
+        
         
     }
 
@@ -288,78 +353,93 @@ contract Affitto {
         The function allows the student to pay the deposit for one of the rooms that are currently blocked in a contract instance
         The contract allows some tolerance on the amount received as the deposit
     */
-    function renter_pay_deposit(uint256 contract_id) public payable {
-        uint256 amt_to_pay = get_renter_deposit_in_wei();
+    function landlord_pay_deposit(uint256 contract_id) public payable {
+        uint256 amt_to_pay = get_landlord_deposit_in_wei();
         contract_instance memory instance = contract_record[contract_id];
         Role role = user_info[msg.sender].role;
-        require(role == Role.Renter, "Data inconsistency"); // probabilmente inutile (già implicitamente incluso nel secondo require)
-        require(msg.sender == instance.renter, "Data inconsistency");
+        require(role == Role.Landlord, "Data inconsistency"); // probabilmente inutile (già implicitamente incluso nel secondo require)
+        require(msg.sender == instance.landlord, "Data inconsistency");
         uint256 paid_amount = msg.value;
         require((amt_to_pay - 100000) <= paid_amount && paid_amount <= (amt_to_pay + 100000), "Wrong amount paid"); 
-        instance.amt_paid_renter = paid_amount;
-        instance.renter_paid = true;
+        instance.amt_paid_landlord = paid_amount;
+        instance.landlord_paid = true;
+
+        if (instance.student_paid) {
+            instance.contract_phase = ContractPhase.Stable;
+        }
         contract_record[contract_id] = instance;    
     }
 
     /*  @param contract_id
         The function allows either party to withdraw from their contract
-        The function calls an internal function named delete contract instance to delete this contract instance
-        and transfer any funds paid by either party to the other party
+        The function behaves accordingly to the phase the contract is in
     */
     function withdraw_from_contract(uint256 contract_id) public {
         address receder = msg.sender;
 
         address other;
+
         contract_instance memory instance = contract_record[contract_id];
+
         if (user_info[msg.sender].role == Role.Student) {
             // require also protects in case contract_id doesn't exist
-            require(instance.student == msg.sender, "You tried withdraw from a contract you are not a part of");
-            other = contract_record[contract_id].renter;
+            require(instance.student == msg.sender, "You tried to withdraw from a contract you are not a part of");
+            other = contract_record[contract_id].landlord;
         }
         else {
             // require also protects in case contract_id doesn't exist
-            require(instance.renter == msg.sender, "You tried withdraw from a contract you are not a part of");
+            require(instance.landlord == msg.sender, "You tried to withdraw from a contract you are not a part of");
             other = contract_record[contract_id].student;
         }
         uint256 room_id = instance.room_id;
 
-        delete_contract_instance(receder, other, contract_id, room_id);
-        
-        uint256 amt_to_give_back = rooms_record[instance.room_id].deposit * conversion_rate;
-        
-        payable(other).transfer(amt_to_give_back + instance.amt_paid_renter);
+        if (instance.contract_phase == ContractPhase.Initial) {
+            if (instance.student_paid) {
+                uint256 amt_to_give_back = instance.amt_paid_student * 10 / 11;
+                instance.student.transfer(amt_to_give_back);
+            }
+            else if (instance.landlord_paid) {
+                instance.landlord.transfer(instance.amt_paid_landlord);
+            }
+        }
+        else if (instance.contract_phase == ContractPhase.Stable) {
+            uint256 amt_to_give_back = instance.amt_paid_student * 10 / 11;
+            delete_contract_instance(receder, other, contract_id, room_id);
+    
+            payable(other).transfer(amt_to_give_back + instance.amt_paid_landlord);
+        } 
     }
 
     /*  @param contract_id
         function allows either party to end their contract successfully.
         It updates the contract instance to indicate that the sender has concluded the contract.
         If both parties have concluded the contract, it calls an internal to delete this contract instance
-         and transfer any funds paid to the renter
+         and transfer any funds paid to the landlord
     */
     function end_contract_successfully(uint256 contract_id) public returns (bool) {
         contract_instance memory instance = contract_record[contract_id];
         require(instance.student_paid, "Student has yet to pay");
-        require(instance.renter_paid, "Renter has yet to pay");
+        require(instance.landlord_paid, "landlord has yet to pay");
         address student;
-        address renter;
+        address landlord;
         if (user_info[msg.sender].role == Role.Student) {
             student = msg.sender;
             require(instance.student == student, "You are trying to terminate a contract you are not a part of");
             instance.concluded_student = true;
-            renter = instance.renter;
+            landlord = instance.landlord;
         }
-        else if (user_info[msg.sender].role == Role.Renter){
-            renter = msg.sender;
-            require(instance.renter == renter, "You are trying to terminate a contract you are not a part of");
-            instance.concluded_renter = true;
+        else if (user_info[msg.sender].role == Role.Landlord){
+            landlord = msg.sender;
+            require(instance.landlord == landlord, "You are trying to terminate a contract you are not a part of");
+            instance.concluded_landlord = true;
             student = instance.student;
         }
 
-        if (instance.concluded_renter && instance.concluded_student) {
+        if (instance.concluded_landlord && instance.concluded_student) {
             uint256 amt_to_give_back = rooms_record[instance.room_id].deposit * conversion_rate;
-            payable(renter).transfer(amt_to_give_back);
-            payable(renter).transfer(instance.amt_paid_renter);
-            delete_contract_instance(student, renter, contract_id);
+            payable(landlord).transfer(amt_to_give_back);
+            payable(landlord).transfer(instance.amt_paid_landlord);
+            delete_contract_instance(student, landlord, contract_id);
             return true;
         }
         else {
@@ -368,11 +448,84 @@ contract Affitto {
         }
     }
 
+    /*  @param contract id
+        function to hybernate the contract if one party suspects malevolent behavior
+     */
+    function hybernate_contract(uint256 contract_id) public {
+        contract_instance memory instance = contract_record[contract_id];
+        require(instance.student == msg.sender || instance.landlord == msg.sender, "You are trying to hybernate a contract you are not a part of");
+        require(instance.contract_phase == ContractPhase.Stable, "You can only hybernate a contract when it's considered stable");
+        instance.contract_phase = ContractPhase.Hybernated;
+        contract_record[contract_id] = instance;
+        hybernated_contracts[contract_id] = msg.sender;
+    }
 
-    function get_user_info(address add) public view returns (bool, uint256[] memory, uint256, bool) {
+    /*  @param contract_id
+        this function allows the party who hybernated the contract to unlock it and restore its previous state of stable contract
+        (pacific resolution)
+     */
+    function de_hybernate_contract(uint256 contract_id) public {
+        require(hybernated_contracts[contract_id] == msg.sender, "You cannot unlock a contract instance if it wasn't you to hybernate it");
+        delete(hybernated_contracts[contract_id]);
+        contract_instance memory instance = contract_record[contract_id];
+        instance.contract_phase = ContractPhase.Stable;
+    }
+
+    /*  @param contract_id
+        allows one party in a hybernated contract to admit fault 
+        All the money deposited in the contract (minus the 10% earned by the contract) are given to the other part and the contract instance is terminated
+    */
+    function admit_fault(uint256 contract_id) public {
+        contract_instance memory instance = contract_record[contract_id];
+        require(instance.student == msg.sender || instance.landlord == msg.sender, "You can't perform this action on a contract you are not a part of");
+        require(instance.contract_phase == ContractPhase.Hybernated, "You can't perform this action on a contract that is not hybernated");
+        address payable other;
+        if (instance.student == msg.sender) {
+            other = instance.landlord;
+        }
+        else {
+            other = instance.student;
+        }
+        uint256 amt_to_give_back = instance.amt_paid_landlord + instance.amt_paid_student * 10 / 11;
+        other.transfer(amt_to_give_back);
+        delete(hybernated_contracts[contract_id]);
+        delete_contract_instance(instance.student, instance.landlord, contract_id, instance.room_id);
+    }
+
+    /*  @param current_timestamp the current timestamp passed by the application; the time unit of the parameter is seconds
+        The function iterates the mapping contract_record and checks, for each contract in the initial phase, if the time limit to make the contract stable has been reached
+        if so, the contract instance gets deleted and the money eventually paid by one of the parties is given back (if the student gets refunded the contract keeps the 10% earning)
+        the function returns an array with the contract ids of all the contracts instance that have been deleted
+        Since the contract has no notion of time, the application will be in charge to periodically call this function
+     */
+    /* function check_unstable_contracts_validity(uint256 current_timestamp) public returns (uint256[] memory) {
+        uint256[] memory expired_contracts = new uint256[](contract_record_keys.length); 
+        for (uint256 i = 0; i < contract_record_keys.length; i++) {
+            uint256 contract_id = contract_record_keys[i];
+            contract_instance memory instance = contract_record[contract_id];
+            if (instance.contract_phase == ContractPhase.Initial && current_timestamp >= (instance.creation_time + time_limit_to_make_contract_stable)) {
+                expired_contracts[i] = contract_id;
+                if (instance.student_paid) {
+                    instance.student.transfer(instance.amt_paid_student * 10 / 11);
+                }
+                else if (instance.landlord_paid) {
+                    instance.landlord.transfer(instance.amt_paid_landlord);
+                }
+                delete_contract_instance(instance.student, instance.landlord, contract_id, instance.room_id);
+            }
+        }
+        //uint256[] memory actual_array = expired_contracts[0:actual_length];
+        return expired_contracts; 
+        // the array is with high probability partially "empty", but I can't slice it nor I can create it dynamically and use the push() method and I honestly feel like crying
+        // It should be fine anyways because the default value should be zero and the contract ids start from 1, so there shouldn't be any ambiguity. 
+        // The application will need to keep this into consideration though.
+    } */
+
+
+/*     function get_user_info(address add) public view returns (bool, uint256[] memory, uint256, bool) {
         user memory u = user_info[add];
         bool role;
-        if (u.role == Role.Renter) {
+        if (u.role == Role.Landlord) {
             role = true;
         }
         else {
@@ -385,13 +538,13 @@ contract Affitto {
     }
 
     function get_room_list(address a) public view returns (uint256[] memory) {
-        return renters_rooms[a];
+        return landlords_rooms[a];
     }
 
     function get_contract_info(uint256 contract_id) public view returns (uint256, uint256, bool, bool, uint256, uint256, bool, bool, address, address) {
         contract_instance memory instance = contract_record[contract_id];
-        return (contract_id, instance.room_id, instance.student_paid, instance.renter_paid, instance.amt_paid_student, instance.amt_paid_renter, instance.concluded_student, instance.concluded_renter, instance.student, instance.renter);
-    }
+        return (contract_id, instance.room_id, instance.student_paid, instance.landlord_paid, instance.amt_paid_student, instance.amt_paid_landlord, instance.concluded_student, instance.concluded_landlord, instance.student, instance.landlord);
+    } */
 
     // returns the deposit for the blocked room in wei with the 10% added as the contract's fee for the service
     function get_student_deposit_in_wei(uint256 room_id) public view returns (uint256) {
@@ -401,11 +554,11 @@ contract Affitto {
         return (net_amt_in_wei + contract_gain); 
     }
 
-    function get_renter_deposit_in_wei() public view returns (uint256) {
-        return (renter_deposit * conversion_rate);
+    function get_landlord_deposit_in_wei() public view returns (uint256) {
+        return (landlord_deposit * conversion_rate);
     }
 
-    function get_room_info(uint256 room_id) public view returns (uint256, address, bool, uint256) {
+/*     function get_room_info(uint256 room_id) public view returns (uint256, address, bool, uint256) {
         room memory r = rooms_record[room_id];
         uint256 id = r.id;
         address owner = r.owner;
@@ -413,7 +566,7 @@ contract Affitto {
         uint256 deposit = r.deposit;
         return (id, owner, occupied, deposit);
     }
-
+ */
     /* function get_user_info_map() public view {
         for (uint256 i = 0; i < user_info_keys.length; i++) {
             if (user_info[user_info_keys[i]].role == Role.Student) {
@@ -448,11 +601,11 @@ contract Affitto {
     function check_if_already_paid(address addr, uint256 contract_id) public view returns (bool) {
         Role role = user_info[addr].role;
         contract_instance memory instance = contract_record[contract_id];
-        if (role == Role.Renter) {
+        if (role == Role.Landlord) {
             //console.log("Role: ", true);
-            //console.log("Instance renter: ", instance.renter);
-            require(addr == instance.renter, "Data inconsistency 1");
-            return instance.renter_paid;
+            //console.log("Instance landlord: ", instance.landlord);
+            require(addr == instance.landlord, "Data inconsistency 1");
+            return instance.landlord_paid;
         }
         else {
             //console.log("Role: ", false);
@@ -543,7 +696,7 @@ contract Affitto {
     }  
 
 
-    function remove(uint256[] storage array, uint256 element) private {
+    /* function remove(uint256[] storage array, uint256 element) private {
         uint256 index;
         bool found = false;
         for(uint256 i = 0; i < array.length; i++) {
@@ -556,9 +709,9 @@ contract Affitto {
         require(found, "Element not present in array");
         array[index] = array[array.length - 1];
         array.pop();
-    }
+    } */
 
-    function remove(address[] storage array, address element) private {
+    /* function remove(address[] storage array, address element) private {
         uint256 index;
         bool found = false;
         for(uint256 i = 0; i < array.length; i++) {
@@ -571,7 +724,7 @@ contract Affitto {
         require(found, "Element not present in array");
         array[index] = array[array.length - 1];
         array.pop();
-    }
+    } */
 
     fallback() external payable {
         emit Log("fallback", msg.sender, msg.value, msg.data);

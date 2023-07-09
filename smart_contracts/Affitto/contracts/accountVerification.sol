@@ -7,7 +7,7 @@ import "./EllipticCurve.sol";
 import "./EllipticCurveFastMult.sol";
 import "./zkp.sol";
 
-contract accountVerification{
+library accountVerification{
    
     // Takes in a private key and returns the corresponding public key
     // Everyone knows the input of a function. DO NOT USE IT IN A PUBLIC BLOCKCHAIN!
