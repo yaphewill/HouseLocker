@@ -101,14 +101,14 @@ contract Affitto {
             - If one party withdraws, all the money deposited in the contract, minus the percentage earned by the contract, is given to the other party
             - If both parties agree that the contract can end successfully, then all the money, minus the percentage earned by the contract, is given to the landlord
         
-        HYBERNATED PHASE: When a party suspects the other of malevolent behavior, it can block the contract instance in an hybernated phase.
+        HIBERNATED PHASE: When a party suspects the other of malevolent behavior, it can block the contract instance in an hibernated phase.
         This phase waits for the competent autorities to run the necessary checks on the reality of the situation and to decide which party 
         deserves the money deposited in the contract.
     */
     enum ContractPhase {
         Initial,
         Stable,
-        Hybernated
+        Hibernated
     }
 
     // associates to each contract id the respective contract record
@@ -127,8 +127,8 @@ contract Affitto {
     mapping(uint256 => room) rooms_record;
     //uint256[] rooms_record_keys; 
     
-    // contains all the ids of the hybernated contracts and the address of the party that hybernated them
-    mapping(uint256 => address) hybernated_contracts;
+    // contains all the ids of the hibernated contracts and the address of the party that hibernated them
+    mapping(uint256 => address) hibernated_contracts;
 
     // conversion rate from eur to wei
     uint256 conversion_rate = 586099570929370;  
@@ -203,7 +203,6 @@ contract Affitto {
 
         The landlord can register several rooms at once by providing the ids of the rooms, it adds the new room structs to the rooms_record_mapping
     */
-
     function register_rooms(uint256[] memory rooms, uint256[] memory deposits) public {
         // controlliamo che il chiamante sia un landlord
         require(user_info[msg.sender].role == Role.Landlord, "You are not a landlord therefore you're not allowed to register rooms");
@@ -265,73 +264,16 @@ contract Affitto {
         user_info[landlord].contract_instance_record.push(new_id);
     }
 
-    /*  @param landlord The address of the landlord 
-
-        This version of the function doesn't take the room_id as an info, in case the student doesn't care about which room they get assigned
-        The student just gets assigned the first room available
-    
-    */
-    function initialize(address payable landlord, uint256 timestamp) public {
-        require(check_user_already_registered(msg.sender), "You are not an authorized user");
-        require(check_user_already_registered(landlord), "landlord is not an authorized user");
-        require(user_info[msg.sender].role == Role.Student, "You are not a student");
-        require(user_info[landlord].role == Role.Landlord, "The address provided does not correspond to a landlord");
-        address payable student = payable(msg.sender);
-
-        
-        
-        uint256 room_id;
-        bool room_found = false;
-
-        // Checks if the owner has any rooms available
-        for (uint256 i = 0; i < user_info[landlord].num_rooms; i++) {
-            if (!rooms_record[landlords_rooms[landlord][i]].occupied) {
-                room_found = true;
-                room_id = rooms_record[landlords_rooms[landlord][i]].id;
-                break;
-            }
-        }
-        
-        require(room_found, "This landlord's rooms are all already occupied"); 
-
-        // Check that neither the student and the landlord are in a contract instance (the student is allowed to participate in only one contract instance at a time)
-        require(check_if_already_in_contract(student, room_id) == false, "Student or room already in contract"); // controllare che l'inizializzazione venga interrotta e venga emesso il messaggio di errore
-
-        uint256 new_id = num_contracts;
-        num_contracts++;
-        rooms_record[room_id].occupied = true;
-        contract_instance memory instance = contract_instance({
-            contract_id: new_id, 
-            room_id: room_id, 
-            student: student, 
-            landlord: landlord,
-            student_paid: false, 
-            landlord_paid: false, 
-            amt_paid_student: 0, 
-            amt_paid_landlord: 0, 
-            concluded_student: false, 
-            concluded_landlord: false, 
-            creation_time: timestamp,
-            contract_phase: ContractPhase.Initial
-        });
-        contract_record[new_id] = instance;
-        contract_record_keys.push(new_id);
-        user_info[student].contract_instance_record.push(new_id);
-        user_info[landlord].contract_instance_record.push(new_id);
-
-    
-    }
-
     /*  The function allows the student to pay the deposit for the room he has locked in the contract instance
         The contract allows some tolerance on the amount received as the deposit
     */
     function student_pay_deposit() public payable {
         Role role = user_info[msg.sender].role;
         require(role == Role.Student);
-        
         uint256 contract_id = user_info[msg.sender].contract_instance_record[0];
         //console.log(contract_id);
         contract_instance memory instance = contract_record[contract_id];
+        require(!instance.student_paid, "You already paid for this contract");
         uint256 paid_amount = msg.value;
         uint256 amt_to_pay = get_student_deposit_in_wei(instance.room_id);
         //console.log("Paid amount", paid_amount);
@@ -356,6 +298,7 @@ contract Affitto {
     function landlord_pay_deposit(uint256 contract_id) public payable {
         uint256 amt_to_pay = get_landlord_deposit_in_wei();
         contract_instance memory instance = contract_record[contract_id];
+        require(!instance.landlord_paid, "You already paid for this contract");
         Role role = user_info[msg.sender].role;
         require(role == Role.Landlord, "Data inconsistency"); // probabilmente inutile (già implicitamente incluso nel secondo require)
         require(msg.sender == instance.landlord, "Data inconsistency");
@@ -380,6 +323,7 @@ contract Affitto {
         address other;
 
         contract_instance memory instance = contract_record[contract_id];
+        require(instance.contract_phase != ContractPhase.Hibernated, "You can't withdraw from a hibernated contract");
 
         if (user_info[msg.sender].role == Role.Student) {
             // require also protects in case contract_id doesn't exist
@@ -404,10 +348,10 @@ contract Affitto {
         }
         else if (instance.contract_phase == ContractPhase.Stable) {
             uint256 amt_to_give_back = instance.amt_paid_student * 10 / 11;
-            delete_contract_instance(receder, other, contract_id, room_id);
     
             payable(other).transfer(amt_to_give_back + instance.amt_paid_landlord);
-        } 
+        }
+        delete_contract_instance(receder, other, contract_id, room_id); 
     }
 
     /*  @param contract_id
@@ -418,8 +362,9 @@ contract Affitto {
     */
     function end_contract_successfully(uint256 contract_id) public returns (bool) {
         contract_instance memory instance = contract_record[contract_id];
-        require(instance.student_paid, "Student has yet to pay");
-        require(instance.landlord_paid, "landlord has yet to pay");
+        require(instance.contract_phase == ContractPhase.Stable);
+        /* require(instance.student_paid, "Student has yet to pay");
+        require(instance.landlord_paid, "landlord has yet to pay"); */
         address student;
         address landlord;
         if (user_info[msg.sender].role == Role.Student) {
@@ -439,7 +384,7 @@ contract Affitto {
             uint256 amt_to_give_back = rooms_record[instance.room_id].deposit * conversion_rate;
             payable(landlord).transfer(amt_to_give_back);
             payable(landlord).transfer(instance.amt_paid_landlord);
-            delete_contract_instance(student, landlord, contract_id);
+            delete_contract_instance(student, landlord, contract_id, 0);
             return true;
         }
         else {
@@ -449,36 +394,37 @@ contract Affitto {
     }
 
     /*  @param contract id
-        function to hybernate the contract if one party suspects malevolent behavior
+        function to hibernate the contract if one party suspects malevolent behavior
      */
-    function hybernate_contract(uint256 contract_id) public {
+    function hibernate_contract(uint256 contract_id) public {
         contract_instance memory instance = contract_record[contract_id];
-        require(instance.student == msg.sender || instance.landlord == msg.sender, "You are trying to hybernate a contract you are not a part of");
-        require(instance.contract_phase == ContractPhase.Stable, "You can only hybernate a contract when it's considered stable");
-        instance.contract_phase = ContractPhase.Hybernated;
+        require(instance.student == msg.sender || instance.landlord == msg.sender, "You are trying to hibernate a contract you are not a part of");
+        require(instance.contract_phase == ContractPhase.Stable, "You can only hibernate a contract when it's considered stable");
+        instance.contract_phase = ContractPhase.Hibernated;
         contract_record[contract_id] = instance;
-        hybernated_contracts[contract_id] = msg.sender;
+        hibernated_contracts[contract_id] = msg.sender;
     }
 
     /*  @param contract_id
-        this function allows the party who hybernated the contract to unlock it and restore its previous state of stable contract
+        this function allows the party who hibernated the contract to unlock it and restore its previous state of stable contract
         (pacific resolution)
      */
-    function de_hybernate_contract(uint256 contract_id) public {
-        require(hybernated_contracts[contract_id] == msg.sender, "You cannot unlock a contract instance if it wasn't you to hybernate it");
-        delete(hybernated_contracts[contract_id]);
+    function de_hibernate_contract(uint256 contract_id) public {
+        require(hibernated_contracts[contract_id] == msg.sender, "You cannot unlock a contract instance if it wasn't you who hibernated it");
+        delete(hibernated_contracts[contract_id]);
         contract_instance memory instance = contract_record[contract_id];
         instance.contract_phase = ContractPhase.Stable;
+        contract_record[contract_id] = instance;
     }
 
     /*  @param contract_id
-        allows one party in a hybernated contract to admit fault 
+        allows one party in a hibernated contract to admit fault 
         All the money deposited in the contract (minus the 10% earned by the contract) are given to the other part and the contract instance is terminated
     */
     function admit_fault(uint256 contract_id) public {
         contract_instance memory instance = contract_record[contract_id];
         require(instance.student == msg.sender || instance.landlord == msg.sender, "You can't perform this action on a contract you are not a part of");
-        require(instance.contract_phase == ContractPhase.Hybernated, "You can't perform this action on a contract that is not hybernated");
+        require(instance.contract_phase == ContractPhase.Hibernated, "You can't perform this action on a contract that is not hibernated");
         address payable other;
         if (instance.student == msg.sender) {
             other = instance.landlord;
@@ -488,17 +434,17 @@ contract Affitto {
         }
         uint256 amt_to_give_back = instance.amt_paid_landlord + instance.amt_paid_student * 10 / 11;
         other.transfer(amt_to_give_back);
-        delete(hybernated_contracts[contract_id]);
+        delete(hibernated_contracts[contract_id]);
         delete_contract_instance(instance.student, instance.landlord, contract_id, instance.room_id);
     }
 
     /*  @param current_timestamp the current timestamp passed by the application; the time unit of the parameter is seconds
         The function iterates the mapping contract_record and checks, for each contract in the initial phase, if the time limit to make the contract stable has been reached
-        if so, the contract instance gets deleted and the money eventually paid by one of the parties is given back (if the student gets refunded the contract keeps the 10% earning)
+        if so, the contract instance gets deleted and the money potentially paid by one of the parties is given back (if the student gets refunded the contract keeps the 10% earning)
         the function returns an array with the contract ids of all the contracts instance that have been deleted
         Since the contract has no notion of time, the application will be in charge to periodically call this function
      */
-    /* function check_unstable_contracts_validity(uint256 current_timestamp) public returns (uint256[] memory) {
+    function check_unstable_contracts_validity(uint256 current_timestamp) public returns (uint256[] memory) {
         uint256[] memory expired_contracts = new uint256[](contract_record_keys.length); 
         for (uint256 i = 0; i < contract_record_keys.length; i++) {
             uint256 contract_id = contract_record_keys[i];
@@ -519,7 +465,7 @@ contract Affitto {
         // the array is with high probability partially "empty", but I can't slice it nor I can create it dynamically and use the push() method and I honestly feel like crying
         // It should be fine anyways because the default value should be zero and the contract ids start from 1, so there shouldn't be any ambiguity. 
         // The application will need to keep this into consideration though.
-    } */
+    }
 
 
 /*     function get_user_info(address add) public view returns (bool, uint256[] memory, uint256, bool) {
@@ -540,11 +486,12 @@ contract Affitto {
     function get_room_list(address a) public view returns (uint256[] memory) {
         return landlords_rooms[a];
     }
+     */
 
-    function get_contract_info(uint256 contract_id) public view returns (uint256, uint256, bool, bool, uint256, uint256, bool, bool, address, address) {
-        contract_instance memory instance = contract_record[contract_id];
-        return (contract_id, instance.room_id, instance.student_paid, instance.landlord_paid, instance.amt_paid_student, instance.amt_paid_landlord, instance.concluded_student, instance.concluded_landlord, instance.student, instance.landlord);
-    } */
+    function get_contract_info(uint256 contract_id) public view returns (uint256, uint256, bool, bool, uint256, uint256, bool, bool, address, address, ContractPhase) {
+        contract_instance memory instance = contract_record[contract_id]; 
+        return (contract_id, instance.room_id, instance.student_paid, instance.landlord_paid, instance.amt_paid_student, instance.amt_paid_landlord, instance.concluded_student, instance.concluded_landlord, instance.student, instance.landlord, instance.contract_phase);
+    }
 
     // returns the deposit for the blocked room in wei with the 10% added as the contract's fee for the service
     function get_student_deposit_in_wei(uint256 room_id) public view returns (uint256) {
@@ -636,11 +583,14 @@ contract Affitto {
         
         // delete the contract instance
         delete(contract_record[contract_id]);
-        //remove(contract_record_keys, contract_id);
+        remove(contract_record_keys, contract_id);
 
         // mark the room as not occupied
-        rooms_record[room_id].occupied = false;
-        
+        // if the room id is 0, then the function takes it as a default value to signal that the 
+        // contract instance is being terminated successfully --> the  room keeps being marked as occupied
+        if(room_id != 0) {
+            rooms_record[room_id].occupied = false;
+        }
         // modify the list of contract instances the addresses are a part of
         uint256[] memory a1_record = user_info[a1].contract_instance_record;
         uint256[] memory a1_new_record; // la lunghezza è uno in meno perché tolgo l'id di contratto dall'array
@@ -663,40 +613,7 @@ contract Affitto {
         user_info[a2].contract_instance_record = a2_new_record;
     }
 
-    // the contract ends successfully 
-    // the difference with the other delete_contract_instance is that the room doesn't get marked as free
-    function delete_contract_instance(address a1, address a2, uint256 contract_id) private {
-        
-        // delete the contract instance
-        delete(contract_record[contract_id]);
-        //remove(contract_record_keys, contract_id);
-        
-        // modify the list of contract instances the addresses are a part of
-        uint256[] memory a1_record = user_info[a1].contract_instance_record;
-        uint256[] memory a1_new_record; 
-        uint256[] memory a2_record = user_info[a2].contract_instance_record;
-        uint256[] memory a2_new_record;
-
-
-        for (uint256 i = 0; i < a1_record.length; i++) {
-            if (a1_record[i] != contract_id) {
-                //console.log(a1_record[i]);
-                a1_new_record[i] = a1_record[i];
-            }  
-        }
-        user_info[a1].contract_instance_record = a1_new_record; 
-
-        for (uint256 i = 0; i < a2_record.length; i++) {
-            if (a2_record[i] != contract_id) {
-                //console.log(a1_record[i]);
-                a2_new_record[i] = a2_record[i];
-            }  
-        }
-        user_info[a2].contract_instance_record = a2_new_record;
-    }  
-
-
-    /* function remove(uint256[] storage array, uint256 element) private {
+    function remove(uint256[] storage array, uint256 element) private {
         uint256 index;
         bool found = false;
         for(uint256 i = 0; i < array.length; i++) {
@@ -709,7 +626,7 @@ contract Affitto {
         require(found, "Element not present in array");
         array[index] = array[array.length - 1];
         array.pop();
-    } */
+    }
 
     /* function remove(address[] storage array, address element) private {
         uint256 index;
