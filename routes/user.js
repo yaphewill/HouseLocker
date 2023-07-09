@@ -21,9 +21,9 @@ router.get("/login", async (req, res) => {
 
 	var is_correct = await check_if_correct2(addr, key);
 	
-	if (!is_correct){
-		res.send("Error: key and address do not match")
-	}
+	// if (!is_correct){
+	// 	res.send("Error: key and address do not match")
+	// }
 
 	User.find(query)
 		.then(el => {
@@ -111,12 +111,12 @@ router.post("/create", async (req, res) => {
 	var r = false;
 	if(rol=="renter") r=true;
 
-	var is_correct = await check_if_correct2(addr, key);
-	console.log(is_correct)
-	if (!is_correct){
-		res.send("Error: key and address do not match")
-	}
-	console.log(addr, rol)
+	// var is_correct = await check_if_correct2(addr, key);
+	// console.log(is_correct)
+	// if (!is_correct){
+	// 	res.send("Error: key and address do not match")
+	// }
+	// console.log(addr, rol)
 
 	var query = { address: addr }
 	console.log(query)

@@ -14,8 +14,8 @@ button:hover{
 } 
 
 body{
-  /* background-color: #69ffeb; */
-  background-color: yellow;
+  background-color: #c9e6c0;
+  /* background-color: yellow; */
 }
 
 .room{
@@ -33,9 +33,9 @@ body{
 .roombox{
   height: 50px;
   width: 400px;
-  background-color: #f0d6d6;
-  border: 5px solid red;
-  border-radius: 20px;
+  background-color: #88b984;
+  /* border: 5px solid red; */
+  /* border-radius: 20px; */
   padding: 20px;
   text-align: center;
   margin: 10px;
@@ -46,7 +46,7 @@ body{
   border-radius: 10px;
 }
 .roombox:hover{
-  background-color: #bfa4a4;
+  background-color: #b0ff9d;
 }
 .puppet{
   height: 0px;
