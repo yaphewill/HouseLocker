@@ -8,7 +8,7 @@ router.get("/", async (req,res)=>{
     res.render("send_money")
 })
 
-router.post("/",(req,res)=>{
+router.post("/student",(req,res)=>{
     // console.log(req)
     var qty = req.body.quantity;
     var sender_addr = req.body.sender;
@@ -17,7 +17,26 @@ router.post("/",(req,res)=>{
 
     console.log("quantity:",qty,"\nsender:",sender_addr, "\nreceiver:",receiver_addr);
 
-    rentContract.methods.send_money(receiver_addr).send({value: web3.utils.toWei(qty, 'ether'), from:sender_addr})
+    rentContract.methods.student_pay_deposit().send({value: web3.utils.toWei(qty, 'ether'), from:sender_addr})
+    .then(result=>{
+        res.send(result)
+    })
+    .catch(err=>{
+        res.send(err)
+    })
+    // .then(*
+})
+
+router.post("/landlord",(req,res)=>{
+    // console.log(req)
+    var qty = req.body.quantity;
+    var sender_addr = req.body.sender;
+    var receiver_addr = req.body.receiver;
+
+
+    console.log("quantity:",qty,"\nsender:",sender_addr, "\nreceiver:",receiver_addr);
+
+    rentContract.methods.landlord_pay_deposit().send({value: web3.utils.toWei(qty, 'ether'), from:sender_addr})
     .then(result=>{
         res.send(result)
     })

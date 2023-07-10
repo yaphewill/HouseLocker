@@ -13,7 +13,7 @@
     <input id = "monthly_fee" name = "monthly_fee" type = "number" required><br><br>
     <label for="place">Expenses included:</label>
     <input id = "expenses" name = "expenses" type = "checkbox"><br><br>
-    <input type="hidden" id="renter" name="renter"><br>
+    <input type="hidden" id="landlord" name="landlord"><br>
     <button type="submit">create room</button>
   </form>
   <!-- <button onclick="create_room()">create room</button> -->
@@ -24,7 +24,7 @@
 <script>
 
   function checking(){
-    alert(document.getElementById("renter").value)
+    alert(document.getElementById("landlord").value)
   }
   function loadFile(){
     let reader = new FileReader();
@@ -60,7 +60,7 @@
 function print_globals(){
   alert(document.getElementById("user_local").innerText);
   alert(document.getElementById("role_local").innerText);
-  alert(document.getElementById("renter").value)
+  alert(document.getElementById("landlord").value)
 }
 
 // function create_room(){
@@ -74,7 +74,7 @@ function print_globals(){
 //     "Content-Type": "application/json",
 //     // 'Content-Type': 'application/x-www-form-urlencoded',
 //     },
-//     renter: JSON.stringify(document.getElementById("user_local").innerText),
+//     landlord: JSON.stringify(document.getElementById("user_local").innerText),
 //     place: JSON.stringify(document.getElementById("place").innerText),
 //     num_beds: JSON.stringify(document.getElementById("beds").innerText),
 //     monthly_fee: JSON.stringify(document.getElementById("monthly_fee").innerText),
@@ -110,8 +110,8 @@ function print_globals(){
       localStorage.setItem("role_global", document.getElementById("role_local").innerText);
     }
     
-    document.getElementById("renter").value=document.getElementById("user_local").innerText;
-    // document.getElementById("renter").value=document.getElementById("user_local").innerText;
+    document.getElementById("landlord").value=document.getElementById("user_local").innerText;
+    // document.getElementById("landlord").value=document.getElementById("user_local").innerText;
     // alert("setting")
     // set_globals(document.getElementById("user_local").value,document.getElementById("role_local").value)
   }

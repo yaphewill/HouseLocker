@@ -39,7 +39,7 @@ router.get("/login", async (req, res) => {
 				// localStorage.setItem("user_global",addr1)
 				// localStorage.setItem("role_global",rol);
 				if (rol == "student") res.render("student/home_student", { title: "HouseLocker", user: addr, role: rol })
-				else res.render("renter/home_renter", { title: "HouseLocker", user: addr, role: rol })
+				else res.render("landlord/home_landlord", { title: "HouseLocker", user: addr, role: rol })
 			}
 		})
 		.catch((err) => {
@@ -72,7 +72,7 @@ router.get("/login", async (req, res) => {
 // 			if (found.length == 0) {
 
 // 				var r = false;
-// 				if(rol=="renter") r=true;
+// 				if(rol=="landlord") r=true;
 // 				console.log(r,gen[0],gen[1],gen[2],gen[3],gen[4],gen[5])
 // 				rentContract.methods.register_user(r,gen[0],gen[1],gen[2],gen[3],gen[4],gen[5],).send({from:addr})
 // 				.then(result=>{
@@ -80,7 +80,7 @@ router.get("/login", async (req, res) => {
 // 					const user1 = new User({ address: addr, role: rol })
 // 					user1.save();
 // 					if (rol == "student") res.render("student/home_student", { title: "HouseLocker", user: addr, role: rol })
-// 					else res.render("renter/home_renter", { title: "HouseLocker", user: addr, role: rol })
+// 					else res.render("landlord/home_landlord", { title: "HouseLocker", user: addr, role: rol })
 // 				})
 // 				.catch(err=>{
 // 					console.log(err)
@@ -108,8 +108,8 @@ router.post("/create", async (req, res) => {
 	var rol = req.body.role;
 	console.log("ROLE:",rol)
 
-	var r = false;
-	if(rol=="renter") r=true;
+	// var r = false;
+	// if(rol=="landlord") r=true;
 
 	// var is_correct = await check_if_correct2(addr, key);
 	// console.log(is_correct)
@@ -124,21 +124,24 @@ router.post("/create", async (req, res) => {
 		.then((found) => {
 			if (found.length == 0) {
 
-				var r = false;
-				if(rol=="renter") r=true;
-				console.log(r)
-				rentContract.methods.register_user(r).send({from:addr, gas:1000000})
-				.then(succ=>{
-					console.log(succ)
-				})
-				const user1 = new User({ address: addr, role: rol })
-				user1.save();
-				if (rol == "student") res.render("student/home_student", { title: "HouseLocker", user: addr, role: rol })
-				else res.render("renter/home_renter", { title: "HouseLocker", user: addr, role: rol })
-
-				//TODO set global variable
-				global.user = addr
-				global.role = rol
+				if(rol == "student"){
+					rentContract.methods.register_student(r).send({from:addr, gas:1000000})
+					.then(succ=>{
+						console.log(succ)
+					})
+					const user1 = new User({ address: addr, role: rol })
+					user1.save();
+					 res.render("student/home_student", { title: "HouseLocker", user: addr, role: rol })
+				}
+				else{
+					rentContract.methods.register_landlord(r).send({from:addr, gas:1000000})
+					.then(succ=>{
+						console.log(succ)
+					})
+					const user1 = new User({ address: addr, role: rol })
+					user1.save();
+					 res.render("student/home_landlord", { title: "HouseLocker", user: addr, role: rol })
+				}
 			}
 			else {
 				res.send("Error: user aready exists")

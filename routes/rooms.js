@@ -14,18 +14,18 @@ router.get("/", async (req,res)=>{
 
 
 
-//RENTER --------------------------------------------------------------------------------------------------
+//landlord --------------------------------------------------------------------------------------------------
 router.get("/create",(req,res)=>{
     console.log(req.query.user)
     console.log(req.query.role)
-    res.render("renter/room_creation", {user: req.query.user, role:req.query.role})
+    res.render("landlord/room_creation", {user: req.query.user, role:req.query.role})
 })
 
 router.post("/create",(req,res)=>{
     console.log(req.body.place)
     console.log(req.body.monthly_fee)
     console.log(req.body.num_beds)
-    console.log("renter:",req.body.renter)
+    console.log("landlord:",req.body.landlord)
 
     var exp;
     if(req.body.expenses == "on") exp = true;
@@ -35,7 +35,7 @@ router.post("/create",(req,res)=>{
     var num = Math.floor(Math.random() * 3)
     var rid = Math.floor(Math.random() * (max - min + 1)) + min
     var f = req.body.monthly_fee;
-    var r = req.body.renter;
+    var r = req.body.landlord;
     console.log("ahoas")
 
     var ri = [rid];
@@ -56,11 +56,11 @@ router.post("/create",(req,res)=>{
         beds : req.body.num_beds,
         fee : req.body.monthly_fee,
         exp_included : exp,
-        renter: req.body.renter,
+        landlord: req.body.landlord,
         image:num,
     })
     room1.save();
-    res.render("renter/home_renter",{user:req.body.renter, role:"renter", title:"HouseBlocker"})
+    res.render("landlord/home_landlord",{user:req.body.landlord, role:"landlord", title:"HouseBlocker"})
 })
 
 router.get("/get/all", (req,res)=>{

@@ -5,10 +5,10 @@
 <p style="display:none; top:10px; position:absolute;" id ="role_local"><%=role%></p>
 
 <template>
-  <div class = "roombox" id="" name="" fee="" via="" renter="" img_num = "" onclick="show_info(this)"></div>
+  <div class = "roombox" id="" name="" fee="" via="" landlord="" img_num = "" onclick="show_info(this)"></div>
 </template>
 
-<div style="display:none" id="current" rid="" renter=""></div>
+<div style="display:none" id="current" rid="" landlord=""></div>
 <div class="puppet" id="puppet" display = "none">
 </div>
 
@@ -16,7 +16,7 @@
   <p style="position:relative; padding:10px;" id = "p1" name = "via">Click a room to view details</p>
   <p style="position:relative; padding:10px;" id = "p2" name = "fee"></p>
   <p style="position:relative; padding:10px;" id = "p3" name="expenses"></p>
-  <p style="position:relative; padding:10px;" id = "renter" name = "renter"></p>
+  <p style="position:relative; padding:10px;" id = "landlord" name = "landlord"></p>
   <img number="" src="" id="image" style="width:300px; height:200px;"><br><br><br><br>
 </div>
 
@@ -53,7 +53,7 @@ function onloaded(){
       var beds = rooms[i].beds;
       var fee = rooms[i].fee;
       var id = rooms[i].id;
-      var renter = rooms[i].renter;
+      var landlord = rooms[i].landlord;
       // alert("a")
       var img_num = rooms[i].image;
       // alert("b")
@@ -69,7 +69,7 @@ function onloaded(){
       body.setAttribute("via",via);
       body.setAttribute("beds",beds);
       body.setAttribute("fee",fee);
-      body.setAttribute("renter",renter);
+      body.setAttribute("landlord",landlord);
       body.setAttribute("img_num",img_num)
 
       body.textContent = via + "\n " + beds +" letti\n "+ fee + " euro al mese"
@@ -105,12 +105,12 @@ function show_info(event){
   var beds = event.getAttribute("beds");
   var fee = event.getAttribute("fee");
   var id = event.getAttribute("id");
-  var renter = event.getAttribute("renter");
+  var landlord = event.getAttribute("landlord");
   var img_num = event.getAttribute("img_num")
   var text = "";
 
   document.getElementById("current").setAttribute("rid",id)
-  document.getElementById("current").setAttribute("renter",renter)
+  document.getElementById("current").setAttribute("landlord",landlord)
   // infos.style.display="block";
 
 
@@ -124,7 +124,7 @@ function show_info(event){
   if(fee) infos.getElementsByTagName("p")[2].textContent = "spese incluse";
   else infos.getElementsByTagName("p")[2].textContent = "spese escluse"
 
-  infos.getElementsByTagName("p")[3].textContent = "per info: " + renter;
+  infos.getElementsByTagName("p")[3].textContent = "per info: " + landlord;
 
   switch (img_num){
     case "0":{document.getElementById("image").src="http://localhost:8080/bedroom_images/spongebob_bodroom.jpg"; break;}
@@ -137,13 +137,13 @@ function show_info(event){
 function start_contract(){
   alert("AA")
   var rid = document.getElementById("current").getAttribute("rid");
-  var renter = document.getElementById("current").getAttribute("renter");
+  var landlord = document.getElementById("current").getAttribute("landlord");
   var user = document.getElementById("user_local").textContent
-  alert(renter)
+  alert(landlord)
   alert(user)
 
   var k = (document.getElementById("current").getAttribute("rid")).slice(1,-1)
-  var url = "http://localhost:8080/rooms/initialize?address="+renter+"&&rid="
+  var url = "http://localhost:8080/rooms/initialize?address="+landlord+"&&rid="
   +JSON.stringify(document.getElementById("current").getAttribute("rid")).slice(1,-1)
   +"&&user="+user;
   alert(url);

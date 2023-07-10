@@ -16,7 +16,7 @@ const roomSchema = new mongoose.Schema({
     fee:Number,
     beds:Number,
     exp_included:Boolean,
-    renter: String,
+    landlord: String,
     image:Number,
 })
 
