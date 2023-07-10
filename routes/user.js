@@ -222,7 +222,7 @@ router.get("/hibernate", async (req,res)=>{
 	})
 })
 
-router.get("/de-hibernate", async (req,res)=>{
+router.get("/de_hibernate", async (req,res)=>{
 	var user = req.query.user;
 	var cid = req.query.user;
 
@@ -242,6 +242,21 @@ router.get("/end_contract_successfully",async (req,res)=>{
 	var cid = req.query.user;
 
 	rentContract.methods.end_contract_successfully(cid).send({from:user})
+	.then(succ=>{
+		console.log(succ);
+		res.send(succ);
+	})
+	.catch(err=>{
+		console.log(err);
+		res.send(err);
+	})
+})
+
+router.get("/admit_fault",async (req,res)=>{
+	var user = req.query.user;
+	var cid = req.query.user;
+
+	rentContract.methods.admit_fault(cid).send({from:user})
 	.then(succ=>{
 		console.log(succ);
 		res.send(succ);
