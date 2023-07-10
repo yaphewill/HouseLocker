@@ -11,6 +11,9 @@ var sendRouter = require("./routes/send_money")
 var userRouter = require('./routes/user');
 var contractInitRouter = require('./routes/start_contract.js');
 var roomsRouter = require('./routes/rooms');
+var {srentContract } = require("../web3_init");
+const { rentContract } = require('./web3_init');
+
 
 // var localStorage = require('node-localstorage').LocalStorage;
 
@@ -61,3 +64,15 @@ app.use(function(err, req, res, next) {
 module.exports = app;
 
 //TODO separate views of student and landlord
+
+setInterval(call_validity_check, 3600000); //calls it every hour
+
+call_validity_check(){
+  rentContract.methods.check_unstable_contracts_validity.send()
+  .then(succ=>{
+    console.log("called contracts check");
+  })
+  .catch(err=>{
+    console.log("problem calling contracts check");
+  })
+}

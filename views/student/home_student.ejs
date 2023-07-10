@@ -68,10 +68,36 @@
   </form>
 
   <br><br>
-  <form method="GET" action="/user/i_paid">
+  <form method="GET" action="/user/pay/student">
     <input type="text" id="user" name="user"><br>
     <input id="cid" name="cid" type="text"><br>
     <button type="submit">i paid</button>
+  </form>
+
+  <br><br>
+  <form method="GET" action="/user/hibernate">
+    <label for="user">Insert your user:</label>
+    <input type="text" id="user" name="user"><br>
+    <label for="cid">Insert contract id:</label>
+    <input id="cid" name="cid" type="text"><br>
+    <button type="submit">hibernate contract</button>
+  </form>
+
+  <br><br>
+  <form method="GET" action="/user/de-hibernate">
+    <label for="user">Insert your user:</label>
+    <input type="text" id="user" name="user"><br>
+    <label for="cid">Insert contract id:</label>
+    <input id="cid" name="cid" type="text"><br>
+    <button type="submit">de-hibernate contract</button>
+  </form>
+
+  <form method="GET" action="/user/end_contract_successfully">
+    <label for="user">Insert your user:</label>
+    <input type="text" id="user" name="user"><br>
+    <label for="cid">Insert contract id:</label>
+    <input id="cid" name="cid" type="text"><br>
+    <button type="submit">end contract successfully</button>
   </form>
 
 </div>

@@ -172,12 +172,76 @@ router.get("/remove_me",async (req,res)=>{
 })
 
 
-router.get("/i_paid",async(req,res)=>{
+router.get("/pay/student",async(req,res)=>{
 	var user = req.query.user;
 	var cid = req.query.cid;
-	console.log(user,cid);
+	var v = req.query.value;
+	// console.log(user,cid);
 
-	rentContract.methods.end_contract_successfully(cid).send({from:user, gas:1000000})
+	rentContract.methods.student_pay_deposit(cid).send({from:user, gas:1000000, value:v})
+	.then(succ=>{
+		console.log(succ);
+		res.send(succ);
+	})
+	.catch(err=>{
+		console.log(err);
+		res.send(err);
+	})
+})
+
+router.get("/pay/landlord",async(req,res)=>{
+	var user = req.query.user;
+	var cid = req.query.cid;
+	var v = req.query.value;
+	// console.log(user,cid);
+
+	rentContract.methods.landlord_pay_deposit(cid).send({from:user, gas:1000000, value:v})
+	.then(succ=>{
+		console.log(succ);
+		res.send(succ);
+	})
+	.catch(err=>{
+		console.log(err);
+		res.send(err);
+	})
+})
+
+
+router.get("/hibernate", async (req,res)=>{
+	var user = req.query.user;
+	var cid = req.query.user;
+
+	rentContract.methods.hibernate_contract(cid).send({from:user})
+	.then(succ=>{
+		console.log(succ);
+		res.send(succ);
+	})
+	.catch(err=>{
+		console.log(err);
+		res.send(err);
+	})
+})
+
+router.get("/de-hibernate", async (req,res)=>{
+	var user = req.query.user;
+	var cid = req.query.user;
+
+	rentContract.methods.de_hibernate_contract(cid).send({from:user})
+	.then(succ=>{
+		console.log(succ);
+		res.send(succ);
+	})
+	.catch(err=>{
+		console.log(err);
+		res.send(err);
+	})
+})
+
+router.get("/end_contract_successfully",async (req,res)=>{
+	var user = req.query.user;
+	var cid = req.query.user;
+
+	rentContract.methods.end_contract_successfully(cid).send({from:user})
 	.then(succ=>{
 		console.log(succ);
 		res.send(succ);
@@ -231,6 +295,7 @@ async function check_if_correct2(addr, key) {
 		return false;
 	})
 }
+
 
 
 // router.get("/PROVONI",(req,res)=>{
