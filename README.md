@@ -8,3 +8,7 @@ The contract can still be tested in Remix providing all the parameters and calli
 commented (in that way the contract size does not exceed the limit). <br>
 These functionalities can still be tested separately. <br>
 We are sorry for the inconvenience but we weren't able to split Affitto in multiple contracts.
+# About The Contributors
+This was the final project for our "Blockchain" course, the members of the project were four: the three contributors you see plus another 
+student (https://github.com/yaphewill) who didn't have a GitHub account at the time. Basically, all the additions and changes to the code sent 
+by [Federico Valbusa](https://github.com/FedericoValbusa) were made together with the other student.
